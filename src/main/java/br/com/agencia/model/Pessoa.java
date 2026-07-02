@@ -1,6 +1,6 @@
 package br.com.agencia.model;
 
-public class Pessoa {
+public abstract class Pessoa {
     private Integer id;
     private String identificacao;
     private String nome;
