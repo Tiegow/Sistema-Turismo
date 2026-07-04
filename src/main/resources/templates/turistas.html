@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Turistas Cadastrados</title>
+</head>
+<body>
+    <h1>Lista de Turistas (Puxando do Docker!)</h1>
+    <p th:if="${erro}" th:text="${erro}" style="color: red;"></p>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Pagamento</th>
+                <th>Qtd Acompanhantes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="turista : ${turistas}">
+                <td th:text="${turista.id}"></td>
+                <td th:text="${turista.nome}"></td>
+                <td th:text="${turista.email}"></td>
+                <td th:text="${turista.formaPagamento}"></td>
+                <td th:text="${#lists.size(turista.acompanhantes)}"></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <br>
+    <a href="/home">Voltar para Home</a>
+</body>
+</html>
