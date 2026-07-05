@@ -78,7 +78,7 @@ public class VeiculoDAO {
             
             stmt.setString(1, veiculo.getPlaca());
             stmt.setString(2, veiculo.getModelo());
-            stmt.setString(3, veiculo.getCapacidade() != null ? String.valueOf(veiculo.getCapacidade()) : "0");
+            stmt.setInt(3, veiculo.getCapacidade() != null ? veiculo.getCapacidade() : 0);
             stmt.setInt(4, veiculo.getId());
             
             stmt.executeUpdate();
