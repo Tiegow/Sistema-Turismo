@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${roteiro.id != null ? 'Editar Roteiro' : 'Cadastrar Roteiro'}">Cadastrar Roteiro</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="${roteiro.id != null ? 'Editar Roteiro' : 'Cadastrar Roteiro'}"></h1>
+        <p th:if="${erro}" th:text="${erro}" class="alert-error"></p>
+
+        <div class="card">
+            <form th:with="acao=${roteiro.id != null ? '/roteiros/' + roteiro.id : '/roteiros'}" th:action="@{${acao}}" th:object="${roteiro}" method="post">
+                <div class="field">
+                    <label>Nome</label>
+                    <input type="text" th:field="*{nome}" required>
+                </div>
+                <div class="field">
+                    <label>Duração</label>
+                    <input type="text" th:field="*{duracao}" placeholder="Ex.: 4 horas">
+                </div>
+                <div class="field">
+                    <label>Modalidade</label>
+                    <input type="text" th:field="*{modalidade}" placeholder="Ex.: Walking Tour">
+                </div>
+                <div class="field">
+                    <label>Descrição</label>
+                    <input type="text" th:field="*{descricao}">
+                </div>
+
+                <!-- Modo criar: preço inicial -->
+                <fieldset th:if="${roteiro.id == null}">
+                    <legend>Preço Inicial</legend>
+                    <div class="field" style="margin-bottom: 0;">
+                        <label>Valor (R$) — opcional</label>
+                        <input type="number" name="preco" min="0" step="1" placeholder="Ex.: 150">
+                    </div>
+                </fieldset>
+
+                <!-- Modo editar: preço atual + histórico + novo preço -->
+                <fieldset th:if="${roteiro.id != null}">
+                    <legend>Preço</legend>
+
+                    <div class="field">
+                        <label>Preço Atual</label>
+                        <input type="text" th:value="${precoAtual != null ? 'R$ ' + precoAtual.preco : '—'}" disabled>
+                    </div>
+
+                    <div class="field">
+                        <label>Histórico</label>
+                        <ul th:if="${not #lists.isEmpty(roteiro.historicoPrecos)}" style="margin: 0; padding-left: 18px; color: var(--color-muted);">
+                            <li th:each="p : ${roteiro.historicoPrecos}">
+                                <span th:text="'R$ ' + ${p.preco}"></span> —
+                                <span th:if="${p.dataCadastro}" th:text="${#temporals.format(p.dataCadastro, 'dd/MM/yyyy HH:mm')}"></span>
+                                <em th:if="${p.ativo}" style="color: var(--color-primary);">(ativo)</em>
+                            </li>
+                        </ul>
+                        <p th:if="${#lists.isEmpty(roteiro.historicoPrecos)}" style="color: var(--color-muted);">Sem preços cadastrados.</p>
+                    </div>
+
+                    <div class="field" style="margin-bottom: 0;">
+                        <label>Definir novo preço (R$) — opcional</label>
+                        <input type="number" name="novoPreco" min="0" step="1" placeholder="Deixe em branco para manter o atual">
+                    </div>
+                </fieldset>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn">Salvar</button>
+                    <a class="btn btn-secondary" href="/roteiros">Cancelar</a>
+                </div>
+            </form>
+        </div>
+
+        <p><a href="/roteiros">Voltar para Roteiros</a></p>
+    </div>
+</body>
+</html>

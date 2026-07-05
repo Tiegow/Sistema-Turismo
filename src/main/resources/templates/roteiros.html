@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Roteiros Cadastrados</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>Roteiros Cadastrados</h1>
+        <p th:if="${erro}" th:text="${erro}" class="alert-error"></p>
+
+        <div class="card">
+            <div class="toolbar">
+                <a class="btn" href="/roteiros/novo">+ Novo Roteiro</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Duração</th>
+                        <th>Modalidade</th>
+                        <th>Preço Atual</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="roteiro : ${roteiros}">
+                        <td th:text="${roteiro.id}"></td>
+                        <td>
+                            <details>
+                                <summary th:text="${roteiro.nome}"></summary>
+                                <ul>
+                                    <li th:each="p : ${roteiro.historicoPrecos}">
+                                        <span th:text="'R$ ' + ${p.preco}"></span>
+                                        —
+                                        <span th:if="${p.dataCadastro}" th:text="${#temporals.format(p.dataCadastro, 'dd/MM/yyyy HH:mm')}"></span>
+                                        <em th:if="${p.ativo}" style="color: var(--color-primary);">(ativo)</em>
+                                    </li>
+                                    <li th:if="${#lists.isEmpty(roteiro.historicoPrecos)}">Sem preços cadastrados</li>
+                                </ul>
+                            </details>
+                        </td>
+                        <td th:text="${roteiro.duracao}"></td>
+                        <td th:text="${roteiro.modalidade}"></td>
+                        <td>
+                            <strong th:if="${precosAtivos[roteiro.id] != null}" th:text="'R$ ' + ${precosAtivos[roteiro.id].preco}"></strong>
+                            <span th:unless="${precosAtivos[roteiro.id] != null}">—</span>
+                        </td>
+                        <td class="actions">
+                            <a class="btn btn-icon" th:href="@{'/roteiros/' + ${roteiro.id} + '/editar'}" title="Editar">✏️</a>
+                            <form th:action="@{'/roteiros/' + ${roteiro.id} + '/deletar'}" method="post" onsubmit="return confirm('Excluir este roteiro e todo o histórico de preços?');">
+                                <button type="submit" class="btn btn-icon btn-icon-danger" title="Excluir">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(roteiros)}">
+                        <td colspan="6" style="text-align: center; color: var(--color-muted);">Nenhum roteiro cadastrado.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p><a href="/home">Voltar para Home</a></p>
+    </div>
+</body>
+</html>

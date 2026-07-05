@@ -91,16 +91,37 @@ public class RoteiroDAO {
         try (Connection con = ConnectionFactory.getConnection()) {
             con.setAutoCommit(false);
             try {
+                try (PreparedStatement stmt = con.prepareStatement(
+                        "DELETE FROM RESERVA WHERE id_passeio IN (SELECT id FROM PASSEIO WHERE id_roteiro = ?)")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = con.prepareStatement(
+                        "DELETE FROM COLABORADOR_ALOCADO WHERE id_passeio IN (SELECT id FROM PASSEIO WHERE id_roteiro = ?)")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = con.prepareStatement(
+                        "DELETE FROM VEICULO_ALOCADO WHERE id_passeio IN (SELECT id FROM PASSEIO WHERE id_roteiro = ?)")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+
+                try (PreparedStatement stmt = con.prepareStatement("DELETE FROM PASSEIO WHERE id_roteiro = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+
                 try (PreparedStatement stmt = con.prepareStatement("DELETE FROM ROTEIRO_PRECO WHERE id_roteiro = ?")) {
                     stmt.setInt(1, id);
                     stmt.executeUpdate();
                 }
-                
+
                 try (PreparedStatement stmt = con.prepareStatement("DELETE FROM ROTEIRO WHERE id = ?")) {
                     stmt.setInt(1, id);
                     stmt.executeUpdate();
                 }
-                
+
                 con.commit();
             } catch (SQLException e) {
                 con.rollback();
