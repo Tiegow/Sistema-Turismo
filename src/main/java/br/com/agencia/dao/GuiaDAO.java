@@ -140,7 +140,7 @@ public class GuiaDAO extends AbstractPessoaDAO {
         
         Timestamp dt = rs.getTimestamp("data_contratacao");
         if (dt != null) {
-            g.setDataContratacao(dt.toLocalDateTime());
+            g.setDataContratacao(dt.toLocalDateTime().toLocalDate());
         }
         g.setPj(rs.getBoolean("pj"));
         

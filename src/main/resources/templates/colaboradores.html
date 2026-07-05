@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Colaboradores Cadastrados</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>Colaboradores Cadastrados</h1>
+        <p th:if="${erro}" th:text="${erro}" class="alert-error"></p>
+
+        <div class="card">
+            <div class="toolbar">
+                <a class="btn" href="/colaboradores/novo">+ Novo Colaborador</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Data Contratação</th>
+                        <th>PJ</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="colaborador : ${colaboradores}">
+                        <td th:text="${colaborador.id}"></td>
+                        <td th:text="${colaborador.nome}"></td>
+                        <td th:text="${colaborador.email}"></td>
+                        <td th:text="${colaborador.dataContratacao != null ? #temporals.format(colaborador.dataContratacao, 'dd/MM/yyyy') : ''}"></td>
+                        <td th:text="${colaborador.pj != null and colaborador.pj ? 'Sim' : 'Não'}"></td>
+                        <td class="actions">
+                            <a class="btn btn-icon" th:href="@{'/colaboradores/' + ${colaborador.id} + '/editar'}" title="Editar">✏️</a>
+                            <form th:action="@{'/colaboradores/' + ${colaborador.id} + '/deletar'}" method="post" onsubmit="return confirm('Excluir este colaborador?');">
+                                <button type="submit" class="btn btn-icon btn-icon-danger" title="Excluir">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p><a href="/home">Voltar para Home</a></p>
+    </div>
+</body>
+</html>

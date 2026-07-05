@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${colaborador.id != null ? 'Editar Colaborador' : 'Cadastrar Colaborador'}">Cadastrar Colaborador</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="${colaborador.id != null ? 'Editar Colaborador' : 'Cadastrar Colaborador'}"></h1>
+        <p th:if="${erro}" th:text="${erro}" class="alert-error"></p>
+
+        <div class="card">
+            <form th:with="acao=${colaborador.id != null ? '/colaboradores/' + colaborador.id : '/colaboradores'}" th:action="@{${acao}}" th:object="${colaborador}" method="post">
+                <div class="field">
+                    <label>Identificação (CPF/CNPJ)</label>
+                    <input type="text" th:field="*{identificacao}" required>
+                </div>
+                <div class="field">
+                    <label>Nome</label>
+                    <input type="text" th:field="*{nome}" required>
+                </div>
+                <div class="field">
+                    <label>Email</label>
+                    <input type="email" th:field="*{email}">
+                </div>
+                <div class="field">
+                    <label>Telefone</label>
+                    <input type="text" th:field="*{telefone}">
+                </div>
+                <div class="field">
+                    <label>Data de Contratação</label>
+                    <input type="date" th:field="*{dataContratacao}">
+                </div>
+                <div class="field">
+                    <label>
+                        <input type="checkbox" th:field="*{pj}" style="width: auto; display: inline-block;">
+                        Pessoa Jurídica (PJ)
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn">Salvar</button>
+                    <a class="btn btn-secondary" href="/colaboradores">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

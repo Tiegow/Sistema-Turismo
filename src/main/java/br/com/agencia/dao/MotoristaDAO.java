@@ -146,7 +146,7 @@ public class MotoristaDAO extends AbstractPessoaDAO {
         
         Timestamp dtContr = rs.getTimestamp("data_contratacao");
         if (dtContr != null) {
-            m.setDataContratacao(dtContr.toLocalDateTime());
+            m.setDataContratacao(dtContr.toLocalDateTime().toLocalDate());
         }
         m.setPj(rs.getBoolean("pj"));
         
