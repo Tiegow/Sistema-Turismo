@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${veiculo.id != null ? 'Editar Veículo' : 'Cadastrar Veículo'}">Cadastrar Veículo</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="${veiculo.id != null ? 'Editar Veículo' : 'Cadastrar Veículo'}"></h1>
+        <p th:if="${erro}" th:text="${erro}" class="alert-error"></p>
+
+        <div class="card">
+            <form th:with="acao=${veiculo.id != null ? '/veiculos/' + veiculo.id : '/veiculos'}" th:action="@{${acao}}" th:object="${veiculo}" method="post">
+                <div class="field">
+                    <label>Placa</label>
+                    <input type="text" th:field="*{placa}" required>
+                </div>
+                <div class="field">
+                    <label>Modelo</label>
+                    <input type="text" th:field="*{modelo}">
+                </div>
+                <div class="field">
+                    <label>Capacidade</label>
+                    <input type="number" th:field="*{capacidade}" min="0">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn">Salvar</button>
+                    <a class="btn btn-secondary" href="/veiculos">Cancelar</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Histórico de manutenções (fora do form do veículo p/ não aninhar forms) -->
+        <div class="card" th:if="${veiculo.id != null}" style="margin-top: 20px;">
+            <fieldset>
+                <legend>Histórico de Manutenções</legend>
+
+                <table th:if="${not #lists.isEmpty(veiculo.historicoManutencao)}" style="margin-bottom: 12px;">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Entrada</th>
+                            <th>Saída</th>
+                            <th>Motivo</th>
+                            <th>Custo</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="m : ${veiculo.historicoManutencao}">
+                            <td th:text="${m.status}"></td>
+                            <td th:if="${m.dataEntrada}" th:text="${#temporals.format(m.dataEntrada, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td th:unless="${m.dataEntrada}">—</td>
+                            <td th:if="${m.dataSaida}" th:text="${#temporals.format(m.dataSaida, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td th:unless="${m.dataSaida}">—</td>
+                            <td th:text="${m.motivo}"></td>
+                            <td th:if="${m.custo != null}" th:text="'R$ ' + ${m.custo}"></td>
+                            <td th:unless="${m.custo != null}">—</td>
+                            <td class="actions">
+                                <a class="btn btn-icon" th:href="@{'/veiculos/' + ${veiculo.id} + '/manutencoes/' + ${m.id} + '/editar'}" title="Editar manutenção">✏️</a>
+                                <form th:action="@{'/veiculos/' + ${veiculo.id} + '/manutencoes/' + ${m.id} + '/deletar'}" method="post" onsubmit="return confirm('Excluir esta manutenção?');">
+                                    <button type="submit" class="btn btn-icon btn-icon-danger" title="Excluir manutenção">🗑️</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p th:if="${#lists.isEmpty(veiculo.historicoManutencao)}" style="color: var(--color-muted);">Nenhuma manutenção registrada.</p>
+
+                <a class="btn btn-secondary" th:href="@{'/veiculos/' + ${veiculo.id} + '/manutencoes/novo'}">+ Nova Manutenção</a>
+            </fieldset>
+        </div>
+
+        <p><a href="/veiculos">Voltar para Veículos</a></p>
+    </div>
+</body>
+</html>

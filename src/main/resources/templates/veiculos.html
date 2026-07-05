@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Veículos Cadastrados</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>Veículos Cadastrados</h1>
+        <p th:if="${erro}" th:text="${erro}" class="alert-error"></p>
+
+        <div class="card">
+            <div class="toolbar">
+                <a class="btn" href="/veiculos/novo">+ Novo Veículo</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Placa</th>
+                        <th>Modelo</th>
+                        <th>Capacidade</th>
+                        <th>Manutenções</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="v : ${veiculos}">
+                        <td th:text="${v.id}"></td>
+                        <td th:text="${v.placa}"></td>
+                        <td>
+                            <details>
+                                <summary th:text="${v.modelo}"></summary>
+                                <ul>
+                                    <li th:each="m : ${v.historicoManutencao}">
+                                        <span th:text="${m.status}"></span> —
+                                        <span th:if="${m.dataEntrada}" th:text="${#temporals.format(m.dataEntrada, 'dd/MM/yyyy')}"></span>
+                                        <span th:if="${m.custo != null}" th:text="'(R$ ' + ${m.custo} + ')'"></span>
+                                    </li>
+                                    <li th:if="${#lists.isEmpty(v.historicoManutencao)}">Nenhuma manutenção registrada</li>
+                                </ul>
+                            </details>
+                        </td>
+                        <td th:text="${v.capacidade}"></td>
+                        <td th:text="${#lists.size(v.historicoManutencao)}"></td>
+                        <td class="actions">
+                            <a class="btn btn-icon" th:href="@{'/veiculos/' + ${v.id} + '/editar'}" title="Editar">✏️</a>
+                            <form th:action="@{'/veiculos/' + ${v.id} + '/deletar'}" method="post" onsubmit="return confirm('Excluir este veículo e todo o histórico de manutenções?');">
+                                <button type="submit" class="btn btn-icon btn-icon-danger" title="Excluir">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(veiculos)}">
+                        <td colspan="6" style="text-align: center; color: var(--color-muted);">Nenhum veículo cadastrado.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p><a href="/home">Voltar para Home</a></p>
+    </div>
+</body>
+</html>
