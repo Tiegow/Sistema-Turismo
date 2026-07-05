@@ -22,7 +22,7 @@ public class ColaboradorDAO extends AbstractPessoaDAO {
                 String sqlColaborador = "INSERT INTO COLABORADOR (id_pessoa, data_contratacao, pj) VALUES (?, ?, ?)";
                 try (PreparedStatement stmt = con.prepareStatement(sqlColaborador)) {
                     stmt.setInt(1, idGerado);
-                    stmt.setTimestamp(2, colaborador.getDataContratacao() != null ? Timestamp.valueOf(colaborador.getDataContratacao()) : null);
+                    stmt.setTimestamp(2, colaborador.getDataContratacao() != null ? Timestamp.valueOf(colaborador.getDataContratacao().atStartOfDay()) : null);
                     stmt.setBoolean(3, colaborador.getPj() != null ? colaborador.getPj() : false);
                     stmt.executeUpdate();
                 }
@@ -80,7 +80,7 @@ public class ColaboradorDAO extends AbstractPessoaDAO {
 
                 String sqlColaborador = "UPDATE COLABORADOR SET data_contratacao = ?, pj = ? WHERE id_pessoa = ?";
                 try (PreparedStatement stmt = con.prepareStatement(sqlColaborador)) {
-                    stmt.setTimestamp(1, colaborador.getDataContratacao() != null ? Timestamp.valueOf(colaborador.getDataContratacao()) : null);
+                    stmt.setTimestamp(1, colaborador.getDataContratacao() != null ? Timestamp.valueOf(colaborador.getDataContratacao().atStartOfDay()) : null);
                     stmt.setBoolean(2, colaborador.getPj() != null ? colaborador.getPj() : false);
                     stmt.setInt(3, colaborador.getId());
                     stmt.executeUpdate();
@@ -143,7 +143,7 @@ public class ColaboradorDAO extends AbstractPessoaDAO {
         preencherDadosPessoa(c, rs);
         Timestamp dataContratacao = rs.getTimestamp("data_contratacao");
         if (dataContratacao != null) {
-            c.setDataContratacao(dataContratacao.toLocalDateTime());
+            c.setDataContratacao(dataContratacao.toLocalDateTime().toLocalDate());
         }
         c.setPj(rs.getBoolean("pj"));
         return c;

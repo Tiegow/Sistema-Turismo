@@ -21,7 +21,7 @@ public class MotoristaDAO extends AbstractPessoaDAO {
                 try (PreparedStatement stmt = con.prepareStatement(sqlMot)) {
                     stmt.setInt(1, m.getId());
                     stmt.setInt(2, m.getNumeroCnh() != null ? m.getNumeroCnh() : 0);
-                    stmt.setTimestamp(3, m.getValidade() != null ? Timestamp.valueOf(m.getValidade()) : null);
+                    stmt.setTimestamp(3, m.getValidade() != null ? Timestamp.valueOf(m.getValidade().atStartOfDay()) : null);
                     stmt.executeUpdate();
                 }
 
@@ -90,7 +90,7 @@ public class MotoristaDAO extends AbstractPessoaDAO {
                 String sqlMot = "UPDATE MOTORISTA SET numero_cnh = ?, validade = ? WHERE id_colaborador = ?";
                 try (PreparedStatement stmt = con.prepareStatement(sqlMot)) {
                     stmt.setInt(1, m.getNumeroCnh() != null ? m.getNumeroCnh() : 0);
-                    stmt.setTimestamp(2, m.getValidade() != null ? Timestamp.valueOf(m.getValidade()) : null);
+                    stmt.setTimestamp(2, m.getValidade() != null ? Timestamp.valueOf(m.getValidade().atStartOfDay()) : null);
                     stmt.setInt(3, m.getId());
                     stmt.executeUpdate();
                 }
@@ -146,14 +146,14 @@ public class MotoristaDAO extends AbstractPessoaDAO {
         
         Timestamp dtContr = rs.getTimestamp("data_contratacao");
         if (dtContr != null) {
-            m.setDataContratacao(dtContr.toLocalDateTime());
+            m.setDataContratacao(dtContr.toLocalDateTime().toLocalDate());
         }
         m.setPj(rs.getBoolean("pj"));
         
         m.setNumeroCnh(rs.getInt("numero_cnh"));
         Timestamp dtVal = rs.getTimestamp("validade");
         if (dtVal != null) {
-            m.setValidade(dtVal.toLocalDateTime());
+            m.setValidade(dtVal.toLocalDateTime().toLocalDate());
         }
         
         m.setCategoriasCnh(buscarCategorias(m.getId(), con));

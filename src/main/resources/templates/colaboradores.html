@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Colaboradores Cadastrados</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>Colaboradores Cadastrados</h1>
+        <p th:if="${erro}" th:text="${erro}" class="alert-error"></p>
+
+        <div class="card">
+            <div class="toolbar">
+                <a class="btn" href="/colaboradores/novo">+ Novo Colaborador</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Email</th>
+                        <th>Data Contratação</th>
+                        <th>PJ</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="colaborador : ${colaboradores}">
+                        <td th:text="${colaborador.id}"></td>
+                        <td>
+                            <details>
+                                <summary th:text="${colaborador.nome}"></summary>
+                                <ul>
+                                    <li>Identificação: <span th:text="${colaborador.identificacao}"></span></li>
+                                    <li th:if="${colaborador.telefone != null and !colaborador.telefone.isEmpty()}">
+                                        Telefone: <span th:text="${colaborador.telefone}"></span>
+                                    </li>
+
+                                    <th:block th:if="${motoristas.get(colaborador.id) != null}">
+                                        <li>Número CNH: <span th:text="${motoristas.get(colaborador.id).numeroCnh}"></span></li>
+                                        <li th:if="${motoristas.get(colaborador.id).validade != null}">
+                                            Validade CNH: <span th:text="${#temporals.format(motoristas.get(colaborador.id).validade, 'dd/MM/yyyy')}"></span>
+                                        </li>
+                                        <li>
+                                            Categorias:
+                                            <span th:each="cat, stat : ${motoristas.get(colaborador.id).categoriasCnh}" th:text="${cat + (stat.last ? '' : ', ')}"></span>
+                                            <span th:if="${#lists.isEmpty(motoristas.get(colaborador.id).categoriasCnh)}">Nenhuma</span>
+                                        </li>
+                                    </th:block>
+
+                                    <th:block th:if="${guias.get(colaborador.id) != null}">
+                                        <li>
+                                            Idiomas:
+                                            <span th:each="idi, stat : ${guias.get(colaborador.id).idiomas}" th:text="${idi + (stat.last ? '' : ', ')}"></span>
+                                            <span th:if="${#lists.isEmpty(guias.get(colaborador.id).idiomas)}">Nenhum</span>
+                                        </li>
+                                    </th:block>
+                                </ul>
+                            </details>
+                        </td>
+                        <td th:text="${tipos.get(colaborador.id)}"></td>
+                        <td th:text="${colaborador.email}"></td>
+                        <td th:text="${colaborador.dataContratacao != null ? #temporals.format(colaborador.dataContratacao, 'dd/MM/yyyy') : ''}"></td>
+                        <td th:text="${colaborador.pj != null and colaborador.pj ? 'Sim' : 'Não'}"></td>
+                        <td class="actions">
+                            <a class="btn btn-icon" th:href="@{'/colaboradores/' + ${colaborador.id} + '/editar'}" title="Editar">✏️</a>
+                            <form th:action="@{'/colaboradores/' + ${colaborador.id} + '/deletar'}" method="post" onsubmit="return confirm('Excluir este colaborador?');">
+                                <button type="submit" class="btn btn-icon btn-icon-danger" title="Excluir">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p><a href="/home">Voltar para Home</a></p>
+    </div>
+</body>
+</html>

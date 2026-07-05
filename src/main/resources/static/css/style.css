@@ -83,6 +83,12 @@ tbody tr:hover {
     margin: 0;
 }
 
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
