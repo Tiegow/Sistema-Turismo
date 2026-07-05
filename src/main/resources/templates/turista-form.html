@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${turista.id != null ? 'Editar Turista' : 'Cadastrar Turista'}">Cadastrar Turista</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="${turista.id != null ? 'Editar Turista' : 'Cadastrar Turista'}"></h1>
+        <p th:if="${erro}" th:text="${erro}" class="alert-error"></p>
+
+        <div class="card">
+            <form th:with="acao=${turista.id != null ? '/turistas/' + turista.id : '/turistas'}" th:action="@{${acao}}" th:object="${turista}" method="post">
+                <div class="field">
+                    <label>Identificação (CPF/CNPJ)</label>
+                    <input type="text" th:field="*{identificacao}" required>
+                </div>
+                <div class="field">
+                    <label>Nome</label>
+                    <input type="text" th:field="*{nome}" required>
+                </div>
+                <div class="field">
+                    <label>Email</label>
+                    <input type="email" th:field="*{email}">
+                </div>
+                <div class="field">
+                    <label>Telefone</label>
+                    <input type="text" th:field="*{telefone}">
+                </div>
+                <div class="field">
+                    <label>Forma de Pagamento</label>
+                    <input type="text" th:field="*{formaPagamento}">
+                </div>
+
+                <fieldset>
+                    <legend>Acompanhantes</legend>
+
+                    <div id="acompanhantes-container">
+                        <div class="acompanhante-row" th:each="acomp, stat : ${turista.acompanhantes}">
+                            <input type="text" th:name="'acompanhantes[' + ${stat.index} + '].nome'" th:value="${acomp.nome}" placeholder="Nome do acompanhante" required>
+                            <input type="text" th:name="'acompanhantes[' + ${stat.index} + '].telefone'" th:value="${acomp.telefone}" placeholder="Telefone">
+                            <button type="button" class="btn btn-icon btn-icon-danger" onclick="removerAcompanhante(this)" title="Remover">🗑️</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" onclick="adicionarAcompanhante()">+ Adicionar acompanhante</button>
+                </fieldset>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn">Salvar</button>
+                    <a class="btn btn-secondary" href="/turistas">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        let acompanhanteIndex = /*[[${turista.acompanhantes != null ? #lists.size(turista.acompanhantes) : 0}]]*/ 0;
+
+        function adicionarAcompanhante() {
+            const container = document.getElementById('acompanhantes-container');
+            const div = document.createElement('div');
+            div.className = 'acompanhante-row';
+            div.innerHTML =
+                '<input type="text" name="acompanhantes[' + acompanhanteIndex + '].nome" placeholder="Nome do acompanhante" required>' +
+                '<input type="text" name="acompanhantes[' + acompanhanteIndex + '].telefone" placeholder="Telefone">' +
+                '<button type="button" class="btn btn-icon btn-icon-danger" onclick="removerAcompanhante(this)" title="Remover">🗑️</button>';
+            container.appendChild(div);
+            acompanhanteIndex++;
+        }
+
+        function removerAcompanhante(botao) {
+            botao.parentElement.remove();
+            reindexarAcompanhantes();
+        }
+
+        function reindexarAcompanhantes() {
+            const linhas = document.querySelectorAll('#acompanhantes-container .acompanhante-row');
+            linhas.forEach((linha, index) => {
+                linha.querySelectorAll('input').forEach(input => {
+                    input.name = input.name.replace(/acompanhantes\[\d+\]/, 'acompanhantes[' + index + ']');
+                });
+            });
+            acompanhanteIndex = linhas.length;
+        }
+    </script>
+</body>
+</html>
