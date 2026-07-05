@@ -11,33 +11,83 @@
         <p th:if="${erro}" th:text="${erro}" class="alert-error"></p>
 
         <div class="card">
-            <form th:with="acao=${colaborador.id != null ? '/colaboradores/' + colaborador.id : '/colaboradores'}" th:action="@{${acao}}" th:object="${colaborador}" method="post">
-                <div class="field">
-                    <label>Identificação (CPF/CNPJ)</label>
-                    <input type="text" th:field="*{identificacao}" required>
+            <form th:action="@{${formAction}}" method="post">
+                <div th:object="${colaborador}">
+                    <div class="field">
+                        <label>Identificação (CPF/CNPJ)</label>
+                        <input type="text" th:field="*{identificacao}" required>
+                    </div>
+                    <div class="field">
+                        <label>Nome</label>
+                        <input type="text" th:field="*{nome}" required>
+                    </div>
+                    <div class="field">
+                        <label>Email</label>
+                        <input type="email" th:field="*{email}">
+                    </div>
+                    <div class="field">
+                        <label>Telefone</label>
+                        <input type="text" th:field="*{telefone}">
+                    </div>
+                    <div class="field">
+                        <label>Data de Contratação</label>
+                        <input type="date" th:field="*{dataContratacao}">
+                    </div>
+                    <div class="field">
+                        <label>
+                            <input type="checkbox" th:field="*{pj}" style="width: auto; display: inline-block;">
+                            Pessoa Jurídica (PJ)
+                        </label>
+                    </div>
                 </div>
-                <div class="field">
-                    <label>Nome</label>
-                    <input type="text" th:field="*{nome}" required>
-                </div>
-                <div class="field">
-                    <label>Email</label>
-                    <input type="email" th:field="*{email}">
-                </div>
-                <div class="field">
-                    <label>Telefone</label>
-                    <input type="text" th:field="*{telefone}">
-                </div>
-                <div class="field">
-                    <label>Data de Contratação</label>
-                    <input type="date" th:field="*{dataContratacao}">
-                </div>
+
                 <div class="field">
                     <label>
-                        <input type="checkbox" th:field="*{pj}" style="width: auto; display: inline-block;">
-                        Pessoa Jurídica (PJ)
+                        <input type="checkbox" name="ehMotorista" value="true" th:checked="${jaMotorista}" onchange="alternarSecao('secao-motorista', this.checked)">
+                        É Motorista?
                     </label>
                 </div>
+                <fieldset id="secao-motorista" th:object="${motorista}" th:style="${jaMotorista} ? '' : 'display:none;'">
+                    <legend>Dados de Motorista</legend>
+                    <div class="field">
+                        <label>Número da CNH</label>
+                        <input type="number" th:field="*{numeroCnh}" th:required="${jaMotorista}" data-obrigatorio-quando-ativo>
+                    </div>
+                    <div class="field">
+                        <label>Validade da CNH</label>
+                        <input type="date" th:field="*{validade}">
+                    </div>
+                    <div class="field">
+                        <label>Categorias da CNH</label>
+                        <div id="categorias-container">
+                            <div class="acompanhante-row" th:each="cat, stat : ${motorista.categoriasCnh}">
+                                <input type="text" th:name="'categoriasCnh[' + ${stat.index} + ']'" th:value="${cat}" placeholder="Ex: B">
+                                <button type="button" class="btn btn-icon btn-icon-danger" onclick="removerCategoria(this)" title="Remover">🗑️</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="adicionarCategoria()">+ Adicionar categoria</button>
+                    </div>
+                </fieldset>
+
+                <div class="field">
+                    <label>
+                        <input type="checkbox" name="ehGuia" value="true" th:checked="${jaGuia}" onchange="alternarSecao('secao-guia', this.checked)">
+                        É Guia?
+                    </label>
+                </div>
+                <fieldset id="secao-guia" th:object="${guia}" th:style="${jaGuia} ? '' : 'display:none;'">
+                    <legend>Dados de Guia</legend>
+                    <div class="field">
+                        <label>Idiomas</label>
+                        <div id="idiomas-container">
+                            <div class="acompanhante-row" th:each="idi, stat : ${guia.idiomas}">
+                                <input type="text" th:name="'idiomas[' + ${stat.index} + ']'" th:value="${idi}" placeholder="Ex: Inglês">
+                                <button type="button" class="btn btn-icon btn-icon-danger" onclick="removerIdioma(this)" title="Remover">🗑️</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="adicionarIdioma()">+ Adicionar idioma</button>
+                    </div>
+                </fieldset>
 
                 <div class="form-actions">
                     <button type="submit" class="btn">Salvar</button>
@@ -46,5 +96,62 @@
             </form>
         </div>
     </div>
+
+    <script th:inline="javascript">
+        let categoriaIndex = /*[[${motorista.categoriasCnh != null ? #lists.size(motorista.categoriasCnh) : 0}]]*/ 0;
+        let idiomaIndex = /*[[${guia.idiomas != null ? #lists.size(guia.idiomas) : 0}]]*/ 0;
+
+        function alternarSecao(id, mostrar) {
+            const secao = document.getElementById(id);
+            secao.style.display = mostrar ? '' : 'none';
+            secao.querySelectorAll('[data-obrigatorio-quando-ativo]').forEach(campo => {
+                if (mostrar) {
+                    campo.setAttribute('required', 'required');
+                } else {
+                    campo.removeAttribute('required');
+                }
+            });
+        }
+
+        function adicionarCategoria() {
+            const container = document.getElementById('categorias-container');
+            const div = document.createElement('div');
+            div.className = 'acompanhante-row';
+            div.innerHTML =
+                '<input type="text" name="categoriasCnh[' + categoriaIndex + ']" placeholder="Ex: B">' +
+                '<button type="button" class="btn btn-icon btn-icon-danger" onclick="removerCategoria(this)" title="Remover">🗑️</button>';
+            container.appendChild(div);
+            categoriaIndex++;
+        }
+
+        function removerCategoria(botao) {
+            botao.parentElement.remove();
+            const linhas = document.querySelectorAll('#categorias-container .acompanhante-row');
+            linhas.forEach((linha, index) => {
+                linha.querySelector('input').name = 'categoriasCnh[' + index + ']';
+            });
+            categoriaIndex = linhas.length;
+        }
+
+        function adicionarIdioma() {
+            const container = document.getElementById('idiomas-container');
+            const div = document.createElement('div');
+            div.className = 'acompanhante-row';
+            div.innerHTML =
+                '<input type="text" name="idiomas[' + idiomaIndex + ']" placeholder="Ex: Inglês">' +
+                '<button type="button" class="btn btn-icon btn-icon-danger" onclick="removerIdioma(this)" title="Remover">🗑️</button>';
+            container.appendChild(div);
+            idiomaIndex++;
+        }
+
+        function removerIdioma(botao) {
+            botao.parentElement.remove();
+            const linhas = document.querySelectorAll('#idiomas-container .acompanhante-row');
+            linhas.forEach((linha, index) => {
+                linha.querySelector('input').name = 'idiomas[' + index + ']';
+            });
+            idiomaIndex = linhas.length;
+        }
+    </script>
 </body>
 </html>

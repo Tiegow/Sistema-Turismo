@@ -20,6 +20,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Nome</th>
+                        <th>Tipo</th>
                         <th>Email</th>
                         <th>Data Contratação</th>
                         <th>PJ</th>
@@ -29,7 +30,38 @@
                 <tbody>
                     <tr th:each="colaborador : ${colaboradores}">
                         <td th:text="${colaborador.id}"></td>
-                        <td th:text="${colaborador.nome}"></td>
+                        <td>
+                            <details>
+                                <summary th:text="${colaborador.nome}"></summary>
+                                <ul>
+                                    <li>Identificação: <span th:text="${colaborador.identificacao}"></span></li>
+                                    <li th:if="${colaborador.telefone != null and !colaborador.telefone.isEmpty()}">
+                                        Telefone: <span th:text="${colaborador.telefone}"></span>
+                                    </li>
+
+                                    <th:block th:if="${motoristas.get(colaborador.id) != null}">
+                                        <li>Número CNH: <span th:text="${motoristas.get(colaborador.id).numeroCnh}"></span></li>
+                                        <li th:if="${motoristas.get(colaborador.id).validade != null}">
+                                            Validade CNH: <span th:text="${#temporals.format(motoristas.get(colaborador.id).validade, 'dd/MM/yyyy')}"></span>
+                                        </li>
+                                        <li>
+                                            Categorias:
+                                            <span th:each="cat, stat : ${motoristas.get(colaborador.id).categoriasCnh}" th:text="${cat + (stat.last ? '' : ', ')}"></span>
+                                            <span th:if="${#lists.isEmpty(motoristas.get(colaborador.id).categoriasCnh)}">Nenhuma</span>
+                                        </li>
+                                    </th:block>
+
+                                    <th:block th:if="${guias.get(colaborador.id) != null}">
+                                        <li>
+                                            Idiomas:
+                                            <span th:each="idi, stat : ${guias.get(colaborador.id).idiomas}" th:text="${idi + (stat.last ? '' : ', ')}"></span>
+                                            <span th:if="${#lists.isEmpty(guias.get(colaborador.id).idiomas)}">Nenhum</span>
+                                        </li>
+                                    </th:block>
+                                </ul>
+                            </details>
+                        </td>
+                        <td th:text="${tipos.get(colaborador.id)}"></td>
                         <td th:text="${colaborador.email}"></td>
                         <td th:text="${colaborador.dataContratacao != null ? #temporals.format(colaborador.dataContratacao, 'dd/MM/yyyy') : ''}"></td>
                         <td th:text="${colaborador.pj != null and colaborador.pj ? 'Sim' : 'Não'}"></td>
