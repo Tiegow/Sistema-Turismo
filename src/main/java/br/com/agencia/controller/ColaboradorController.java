@@ -1,223 +1,105 @@
 package br.com.agencia.controller;
 
-import br.com.agencia.dao.ColaboradorDAO;
-import br.com.agencia.dao.GuiaDAO;
-import br.com.agencia.dao.MotoristaDAO;
 import br.com.agencia.model.Colaborador;
 import br.com.agencia.model.Guia;
 import br.com.agencia.model.Motorista;
+import br.com.agencia.service.ColaboradorService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Controller
+@RequestMapping("/colaboradores")
 public class ColaboradorController {
 
-    private final ColaboradorDAO colaboradorDAO = new ColaboradorDAO();
-    private final MotoristaDAO motoristaDAO = new MotoristaDAO();
-    private final GuiaDAO guiaDAO = new GuiaDAO();
+    private final ColaboradorService colaboradorService;
 
-    @GetMapping("/colaboradores")
-    public String listar(Model model) {
-        try {
-            List<Colaborador> colaboradores = colaboradorDAO.buscarTodos();
-            Map<Integer, String> tipos = new HashMap<>();
-            Map<Integer, Motorista> motoristas = new HashMap<>();
-            Map<Integer, Guia> guias = new HashMap<>();
-
-            for (Colaborador c : colaboradores) {
-                Motorista motorista = motoristaDAO.buscarPorId(c.getId());
-                Guia guia = guiaDAO.buscarPorId(c.getId());
-                if (motorista != null) motoristas.put(c.getId(), motorista);
-                if (guia != null) guias.put(c.getId(), guia);
-
-                String tipo;
-                if (motorista != null && guia != null) {
-                    tipo = "Motorista + Guia";
-                } else if (motorista != null) {
-                    tipo = "Motorista";
-                } else if (guia != null) {
-                    tipo = "Guia";
-                } else {
-                    tipo = "Colaborador";
-                }
-                tipos.put(c.getId(), tipo);
-            }
-
-            model.addAttribute("colaboradores", colaboradores);
-            model.addAttribute("tipos", tipos);
-            model.addAttribute("motoristas", motoristas);
-            model.addAttribute("guias", guias);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            model.addAttribute("erro", "Erro ao carregar colaboradores do banco de dados!");
-        }
-        return "colaboradores";
+    public ColaboradorController(ColaboradorService colaboradorService) {
+        this.colaboradorService = colaboradorService;
     }
 
-    @GetMapping("/colaboradores/novo")
+    @GetMapping
+    public String listar(Model model) {
+        try {
+            List<Colaborador> colaboradores = colaboradorService.listarTodos();
+            Map<Integer, String> tipos = new HashMap<>();
+            
+            for (Colaborador c : colaboradores) {
+                boolean ehMotorista = colaboradorService.buscarMotorista(c.getId()) != null;
+                boolean ehGuia = colaboradorService.buscarGuia(c.getId()) != null;
+                
+                if (ehMotorista && ehGuia) tipos.put(c.getId(), "Motorista + Guia");
+                else if (ehMotorista) tipos.put(c.getId(), "Motorista");
+                else if (ehGuia) tipos.put(c.getId(), "Guia");
+                else tipos.put(c.getId(), "Apenas Colaborador");
+            }
+            model.addAttribute("colaboradores", colaboradores);
+            model.addAttribute("tipos", tipos);
+        } catch (Exception e) {
+            model.addAttribute("erro", "Erro ao carregar colaboradores.");
+        }
+        return "colaboradores/lista";
+    }
+
+    @GetMapping("/novo")
     public String formNovo(Model model) {
         model.addAttribute("colaborador", new Colaborador());
         model.addAttribute("motorista", new Motorista());
         model.addAttribute("guia", new Guia());
         model.addAttribute("jaMotorista", false);
         model.addAttribute("jaGuia", false);
-        model.addAttribute("formAction", "/colaboradores");
-        return "colaborador-form";
+        return "colaboradores/form";
     }
 
-    @PostMapping("/colaboradores")
+    @PostMapping("/salvar")
     public String salvar(@ModelAttribute("colaborador") Colaborador colaborador,
-                          @ModelAttribute("motorista") Motorista motorista,
-                          @ModelAttribute("guia") Guia guia,
-                          @RequestParam(defaultValue = "false") boolean ehMotorista,
-                          @RequestParam(defaultValue = "false") boolean ehGuia,
-                          Model model) {
-        limparListasVazias(motorista, guia);
-
+                         @ModelAttribute("motorista") Motorista motorista,
+                         @ModelAttribute("guia") Guia guia,
+                         @RequestParam(defaultValue = "false") boolean ehMotorista,
+                         @RequestParam(defaultValue = "false") boolean ehGuia,
+                         RedirectAttributes redirect) {
         try {
-            colaboradorDAO.inserir(colaborador);
-            int id = colaborador.getId();
-            motorista.setId(id);
-            guia.setId(id);
-
-            try {
-                if (ehMotorista) motoristaDAO.tornarMotorista(motorista);
-                if (ehGuia) guiaDAO.tornarGuia(guia);
-            } catch (SQLException e) {
-                colaboradorDAO.deletar(id);
-                throw e;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            model.addAttribute("erro", "Erro ao salvar colaborador! Verifique se a identificação já não está cadastrada.");
-            model.addAttribute("colaborador", colaborador);
-            model.addAttribute("motorista", motorista);
-            model.addAttribute("guia", guia);
-            model.addAttribute("jaMotorista", ehMotorista);
-            model.addAttribute("jaGuia", ehGuia);
-            model.addAttribute("formAction", "/colaboradores");
-            return "colaborador-form";
+            colaboradorService.salvar(colaborador, motorista, guia, ehMotorista, ehGuia);
+            redirect.addFlashAttribute("sucesso", "Colaborador salvo com sucesso!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/colaboradores";
     }
 
-    @GetMapping("/colaboradores/{id}/editar")
+    @GetMapping("/{id}/editar")
     public String formEditar(@PathVariable int id, Model model) {
         try {
-            Colaborador base = colaboradorDAO.buscarPorId(id);
-            if (base == null) {
-                return "redirect:/colaboradores";
-            }
-
-            Motorista motoristaExistente = motoristaDAO.buscarPorId(id);
-            Guia guiaExistente = guiaDAO.buscarPorId(id);
+            Colaborador base = colaboradorService.buscarPorId(id);
+            if (base == null) return "redirect:/colaboradores";
+            
+            Motorista motoristaExistente = colaboradorService.buscarMotorista(id);
+            Guia guiaExistente = colaboradorService.buscarGuia(id);
 
             model.addAttribute("colaborador", base);
-            model.addAttribute("motorista", motoristaExistente != null ? motoristaExistente : copiarComoMotorista(base));
-            model.addAttribute("guia", guiaExistente != null ? guiaExistente : copiarComoGuia(base));
+            model.addAttribute("motorista", motoristaExistente != null ? motoristaExistente : new Motorista());
+            model.addAttribute("guia", guiaExistente != null ? guiaExistente : new Guia());
             model.addAttribute("jaMotorista", motoristaExistente != null);
             model.addAttribute("jaGuia", guiaExistente != null);
-            model.addAttribute("formAction", "/colaboradores/" + id);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             return "redirect:/colaboradores";
         }
-        return "colaborador-form";
+        return "colaboradores/form";
     }
 
-    @PostMapping("/colaboradores/{id}")
-    public String atualizar(@PathVariable int id,
-                             @ModelAttribute("colaborador") Colaborador colaborador,
-                             @ModelAttribute("motorista") Motorista motorista,
-                             @ModelAttribute("guia") Guia guia,
-                             @RequestParam(defaultValue = "false") boolean ehMotorista,
-                             @RequestParam(defaultValue = "false") boolean ehGuia,
-                             Model model) {
-        colaborador.setId(id);
-        motorista.setId(id);
-        guia.setId(id);
-        limparListasVazias(motorista, guia);
-
+    @PostMapping("/{id}/deletar")
+    public String deletar(@PathVariable int id, RedirectAttributes redirect) {
         try {
-            colaboradorDAO.atualizar(colaborador);
-
-            boolean jaMotorista = motoristaDAO.buscarPorId(id) != null;
-            if (ehMotorista) {
-                if (jaMotorista) motoristaDAO.atualizarDadosMotorista(motorista);
-                else motoristaDAO.tornarMotorista(motorista);
-            } else if (jaMotorista) {
-                motoristaDAO.removerPapelMotorista(id);
-            }
-
-            boolean jaGuia = guiaDAO.buscarPorId(id) != null;
-            if (ehGuia) {
-                if (jaGuia) guiaDAO.atualizarIdiomas(guia);
-                else guiaDAO.tornarGuia(guia);
-            } else if (jaGuia) {
-                guiaDAO.removerPapelGuia(id);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            model.addAttribute("erro", "Erro ao atualizar colaborador! Verifique se a identificação já não está cadastrada.");
-            model.addAttribute("colaborador", colaborador);
-            model.addAttribute("motorista", motorista);
-            model.addAttribute("guia", guia);
-            model.addAttribute("jaMotorista", ehMotorista);
-            model.addAttribute("jaGuia", ehGuia);
-            model.addAttribute("formAction", "/colaboradores/" + id);
-            return "colaborador-form";
+            colaboradorService.deletar(id);
+            redirect.addFlashAttribute("sucesso", "Colaborador apagado com sucesso!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/colaboradores";
-    }
-
-    @PostMapping("/colaboradores/{id}/deletar")
-    public String deletar(@PathVariable int id) {
-        try {
-            colaboradorDAO.deletar(id);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return "redirect:/colaboradores";
-    }
-
-    private void limparListasVazias(Motorista motorista, Guia guia) {
-        if (motorista.getCategoriasCnh() != null) {
-            motorista.getCategoriasCnh().removeIf(c -> c == null || c.isBlank());
-        }
-        if (guia.getIdiomas() != null) {
-            guia.getIdiomas().removeIf(i -> i == null || i.isBlank());
-        }
-    }
-
-    private Motorista copiarComoMotorista(Colaborador base) {
-        Motorista m = new Motorista();
-        copiarDadosBase(base, m);
-        return m;
-    }
-
-    private Guia copiarComoGuia(Colaborador base) {
-        Guia g = new Guia();
-        copiarDadosBase(base, g);
-        return g;
-    }
-
-    private void copiarDadosBase(Colaborador origem, Colaborador destino) {
-        destino.setId(origem.getId());
-        destino.setIdentificacao(origem.getIdentificacao());
-        destino.setNome(origem.getNome());
-        destino.setEmail(origem.getEmail());
-        destino.setTelefone(origem.getTelefone());
-        destino.setDataContratacao(origem.getDataContratacao());
-        destino.setPj(origem.getPj());
     }
 }

@@ -1,125 +1,69 @@
 package br.com.agencia.controller;
 
-import br.com.agencia.dao.RoteiroDAO;
-import br.com.agencia.dao.RoteiroPrecoDAO;
 import br.com.agencia.model.Roteiro;
 import br.com.agencia.model.RoteiroPreco;
+import br.com.agencia.service.RoteiroService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+@RequestMapping("/roteiros")
 public class RoteiroController {
 
-    private final RoteiroDAO roteiroDAO = new RoteiroDAO();
-    private final RoteiroPrecoDAO roteiroPrecoDAO = new RoteiroPrecoDAO();
+    private final RoteiroService roteiroService;
 
-    @GetMapping("/roteiros")
-    public String listar(Model model) {
-        try {
-            List<Roteiro> roteiros = roteiroDAO.buscarTodos();
-            Map<Integer, RoteiroPreco> precosAtivos = new HashMap<>();
-            for (Roteiro r : roteiros) {
-                RoteiroPreco ativo = roteiroPrecoDAO.buscarPrecoAtivo(r.getId());
-                if (ativo != null) {
-                    precosAtivos.put(r.getId(), ativo);
-                }
-            }
-            model.addAttribute("roteiros", roteiros);
-            model.addAttribute("precosAtivos", precosAtivos);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            model.addAttribute("erro", "Erro ao carregar roteiros do banco de dados!");
-        }
-        return "roteiros";
+    public RoteiroController(RoteiroService roteiroService) {
+        this.roteiroService = roteiroService;
     }
 
-    @GetMapping("/roteiros/novo")
+    @GetMapping
+    public String listar(Model model) {
+        model.addAttribute("roteiros", roteiroService.listarTodos());
+        return "roteiros/lista";
+    }
+
+    @GetMapping("/novo")
     public String formNovo(Model model) {
         model.addAttribute("roteiro", new Roteiro());
-        return "roteiro-form";
+        return "roteiros/form";
     }
 
-    @PostMapping("/roteiros")
-    public String salvar(@ModelAttribute Roteiro roteiro,
-                         @RequestParam(required = false) Integer preco,
-                         Model model) {
-        try {
-            roteiroDAO.inserir(roteiro);
-            int id = roteiro.getId();
-
-            if (preco != null && preco > 0) {
-                RoteiroPreco roteiroPreco = new RoteiroPreco();
-                roteiroPreco.setPreco(preco);
-                roteiroPreco.setAtivo(true);
-                roteiroPrecoDAO.inserir(roteiroPreco, id);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            model.addAttribute("erro", "Erro ao salvar roteiro!");
-            model.addAttribute("roteiro", roteiro);
-            return "roteiro-form";
-        }
-        return "redirect:/roteiros";
-    }
-
-    @GetMapping("/roteiros/{id}/editar")
+    @GetMapping("/{id}/editar")
     public String formEditar(@PathVariable int id, Model model) {
         try {
-            Roteiro roteiro = roteiroDAO.buscarPorId(id);
+            Roteiro roteiro = roteiroService.buscarPorId(id);
             if (roteiro == null) {
                 return "redirect:/roteiros";
             }
-            RoteiroPreco precoAtual = roteiroPrecoDAO.buscarPrecoAtivo(id);
+            RoteiroPreco precoAtual = roteiroService.buscarPrecoAtivo(id);
             model.addAttribute("roteiro", roteiro);
-            model.addAttribute("precoAtual", precoAtual);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            model.addAttribute("precoAtual", precoAtual != null ? precoAtual.getPreco() : null);
+        } catch (Exception e) {
             return "redirect:/roteiros";
         }
-        return "roteiro-form";
+        return "roteiros/form";
     }
 
-    @PostMapping("/roteiros/{id}")
-    public String atualizar(@PathVariable int id,
-                            @ModelAttribute Roteiro roteiro,
-                            @RequestParam(required = false) Integer novoPreco,
-                            Model model) {
-        roteiro.setId(id);
+    @PostMapping("/salvar")
+    public String salvar(@ModelAttribute Roteiro roteiro, @RequestParam(required = false) Integer preco, RedirectAttributes redirect) {
         try {
-            roteiroDAO.atualizar(roteiro);
-
-            if (novoPreco != null && novoPreco > 0) {
-                roteiroPrecoDAO.inativarPrecoAntigos(id);
-                RoteiroPreco roteiroPreco = new RoteiroPreco();
-                roteiroPreco.setPreco(novoPreco);
-                roteiroPreco.setAtivo(true);
-                roteiroPrecoDAO.inserir(roteiroPreco, id);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            model.addAttribute("erro", "Erro ao atualizar roteiro!");
-            model.addAttribute("roteiro", roteiro);
-            return "roteiro-form";
+            roteiroService.salvar(roteiro, preco);
+            redirect.addFlashAttribute("sucesso", "Roteiro salvo com sucesso!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/roteiros";
     }
 
-    @PostMapping("/roteiros/{id}/deletar")
-    public String deletar(@PathVariable int id) {
+    @PostMapping("/{id}/deletar")
+    public String deletar(@PathVariable int id, RedirectAttributes redirect) {
         try {
-            roteiroDAO.deletar(id);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            roteiroService.deletar(id);
+            redirect.addFlashAttribute("sucesso", "Roteiro deletado com sucesso!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/roteiros";
     }

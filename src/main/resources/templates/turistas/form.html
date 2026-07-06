@@ -1,0 +1,115 @@
+<html th:replace="~{fragments/layout :: page('Ficha do Turista', ~{::section})}">
+<section>
+    <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/turistas}" class="btn btn-outline-secondary btn-sm me-3 shadow-sm">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+        <h3 class="fw-bold m-0" th:text="${turista.id == null || turista.id == 0 ? 'Cadastrar Turista' : 'Editar Turista'}"></h3>
+    </div>
+
+    <form th:action="@{/turistas/salvar}" method="post" id="turistaForm">
+        <input type="hidden" th:field="${turista.id}">
+        
+        <div class="row g-4">
+            <!-- Dados Principais -->
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white pb-0">
+                        <h6 class="fw-bold text-muted"><i class="bi bi-person-lines-fill me-1"></i> Dados Principais</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nome Completo</label>
+                                <input type="text" class="form-control bg-light" th:field="${turista.nome}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Identificação (CPF/Passaporte)</label>
+                                <input type="text" class="form-control bg-light" th:field="${turista.identificacao}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Email</label>
+                                <input type="email" class="form-control bg-light" th:field="${turista.email}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Telefone</label>
+                                <input type="text" class="form-control bg-light" th:field="${turista.telefone}" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Forma de Pagamento Preferida</label>
+                                <select class="form-select bg-light" th:field="${turista.formaPagamento}" required>
+                                    <option value="PIX">PIX</option>
+                                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                    <option value="Boleto">Boleto</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acompanhantes -->
+            <div class="col-md-5">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-muted m-0"><i class="bi bi-people-fill me-1"></i> Acompanhantes</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary py-0" onclick="addAcompanhante()"><i class="bi bi-plus"></i> Add</button>
+                    </div>
+                    <div class="card-body" id="acompanhantes-container">
+                        <div th:each="acomp, stat : *{turista.acompanhantes}" class="acompanhante-row mb-3 p-2 bg-light border rounded">
+                            <div class="d-flex justify-content-between mb-2">
+                                <small class="fw-bold text-muted">Acompanhante</small>
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.acompanhante-row').remove()"><i class="bi bi-trash"></i> Remover</button>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-7">
+                                    <input type="text" class="form-control form-control-sm" th:field="*{turista.acompanhantes[__${stat.index}__].nome}" placeholder="Nome Completo">
+                                </div>
+                                <div class="col-5">
+                                    <input type="text" class="form-control form-control-sm" th:field="*{turista.acompanhantes[__${stat.index}__].telefone}" placeholder="Telefone (Opcional)">
+                                </div>
+                            </div>
+                        </div>
+                        <p th:if="${#lists.isEmpty(turista.acompanhantes)}" class="text-muted small empty-msg">Nenhum acompanhante adicionado.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                <i class="bi bi-save me-1"></i> Salvar Turista
+            </button>
+        </div>
+    </form>
+
+    <script>
+        let acompCount = document.querySelectorAll('.acompanhante-row').length;
+        function addAcompanhante() {
+            let container = document.getElementById('acompanhantes-container');
+            let emptyMsg = container.querySelector('.empty-msg');
+            if(emptyMsg) emptyMsg.remove();
+            
+            let div = document.createElement('div');
+            div.className = 'acompanhante-row mb-3 p-2 bg-light border rounded';
+            div.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <small class="fw-bold text-muted">Novo Acompanhante</small>
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.acompanhante-row').remove()"><i class="bi bi-trash"></i> Remover</button>
+                </div>
+                <div class="row g-2">
+                    <div class="col-7">
+                        <input type="text" class="form-control form-control-sm" name="acompanhantes[${acompCount}].nome" placeholder="Nome Completo">
+                    </div>
+                    <div class="col-5">
+                        <input type="text" class="form-control form-control-sm" name="acompanhantes[${acompCount}].telefone" placeholder="Telefone (Opcional)">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+            acompCount++;
+        }
+    </script>
+</section>
+</html>

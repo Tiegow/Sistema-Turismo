@@ -1,222 +1,137 @@
 package br.com.agencia.controller;
 
-import br.com.agencia.dao.ManutencaoDAO;
-import br.com.agencia.dao.VeiculoDAO;
 import br.com.agencia.model.Manutencao;
 import br.com.agencia.model.Veiculo;
+import br.com.agencia.service.VeiculoService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 
 @Controller
+@RequestMapping("/veiculos")
 public class VeiculoController {
 
-    private final VeiculoDAO veiculoDAO = new VeiculoDAO();
-    private final ManutencaoDAO manutencaoDAO = new ManutencaoDAO();
+    private final VeiculoService veiculoService;
 
-    // ------------------- VEÍCULO -------------------
-
-    @GetMapping("/veiculos")
-    public String listar(Model model) {
-        try {
-            List<Veiculo> veiculos = veiculoDAO.buscarTodos();
-            model.addAttribute("veiculos", veiculos);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            model.addAttribute("erro", "Erro ao carregar veículos do banco de dados!");
-        }
-        return "veiculos";
+    public VeiculoController(VeiculoService veiculoService) {
+        this.veiculoService = veiculoService;
     }
 
-    @GetMapping("/veiculos/novo")
+    @GetMapping
+    public String listar(Model model) {
+        model.addAttribute("veiculos", veiculoService.listarTodos());
+        return "veiculos/lista";
+    }
+
+    @GetMapping("/novo")
     public String formNovo(Model model) {
         model.addAttribute("veiculo", new Veiculo());
-        return "veiculo-form";
+        return "veiculos/form";
     }
 
-    @PostMapping("/veiculos")
-    public String salvar(@ModelAttribute Veiculo veiculo, Model model) {
+    @PostMapping("/salvar")
+    public String salvar(@ModelAttribute Veiculo veiculo, RedirectAttributes redirect) {
         try {
-            veiculoDAO.inserir(veiculo);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            model.addAttribute("erro", "Erro ao salvar veículo! Verifique se a placa já não está cadastrada.");
-            model.addAttribute("veiculo", veiculo);
-            return "veiculo-form";
+            veiculoService.salvar(veiculo);
+            redirect.addFlashAttribute("sucesso", "Veículo salvo com sucesso!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/veiculos";
     }
 
-    @GetMapping("/veiculos/{id}/editar")
+    @GetMapping("/{id}/editar")
     public String formEditar(@PathVariable int id, Model model) {
         try {
-            Veiculo veiculo = veiculoDAO.buscarPorId(id);
-            if (veiculo == null) {
-                return "redirect:/veiculos";
-            }
+            Veiculo veiculo = veiculoService.buscarPorId(id);
+            if (veiculo == null) return "redirect:/veiculos";
             model.addAttribute("veiculo", veiculo);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             return "redirect:/veiculos";
         }
-        return "veiculo-form";
+        return "veiculos/form";
     }
 
-    @PostMapping("/veiculos/{id}")
-    public String atualizar(@PathVariable int id, @ModelAttribute Veiculo veiculo, Model model) {
-        veiculo.setId(id);
+    @PostMapping("/{id}/deletar")
+    public String deletar(@PathVariable int id, RedirectAttributes redirect) {
         try {
-            veiculoDAO.atualizar(veiculo);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            model.addAttribute("erro", "Erro ao atualizar veículo! Verifique se a placa já não está cadastrada.");
-            model.addAttribute("veiculo", veiculo);
-            return "veiculo-form";
-        }
-        return "redirect:/veiculos/" + id + "/editar";
-    }
-
-    @PostMapping("/veiculos/{id}/deletar")
-    public String deletar(@PathVariable int id) {
-        try {
-            veiculoDAO.deletar(id);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            veiculoService.deletar(id);
+            redirect.addFlashAttribute("sucesso", "Veículo deletado com sucesso!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/veiculos";
     }
 
     // ------------------- MANUTENÇÃO -------------------
 
-    @GetMapping("/veiculos/{idVeiculo}/manutencoes/novo")
+    @GetMapping("/{idVeiculo}/manutencoes/novo")
     public String formNovaManutencao(@PathVariable int idVeiculo, Model model) {
-        return prepararFormManutencao(idVeiculo, new Manutencao(), model, null);
+        return prepararFormManutencao(idVeiculo, new Manutencao(), model);
     }
 
-    @PostMapping("/veiculos/{idVeiculo}/manutencoes")
+    @GetMapping("/{idVeiculo}/manutencoes/{idManutencao}/editar")
+    public String formEditarManutencao(@PathVariable int idVeiculo, @PathVariable int idManutencao, Model model) {
+        try {
+            Manutencao m = veiculoService.buscarManutencaoPorId(idManutencao);
+            if (m == null) return "redirect:/veiculos/" + idVeiculo + "/editar";
+            return prepararFormManutencao(idVeiculo, m, model);
+        } catch (Exception e) {
+            return "redirect:/veiculos/" + idVeiculo + "/editar";
+        }
+    }
+
+    @PostMapping("/{idVeiculo}/manutencoes/salvar")
     public String salvarManutencao(@PathVariable int idVeiculo,
+                                   @RequestParam(required = false) Integer id,
                                    @RequestParam(required = false) String status,
                                    @RequestParam(required = false) String dataEntrada,
                                    @RequestParam(required = false) String dataSaida,
                                    @RequestParam(required = false) String motivo,
                                    @RequestParam(required = false) Integer custo,
-                                   Model model) {
+                                   RedirectAttributes redirect) {
         Manutencao m = new Manutencao();
+        m.setId(id);
         m.setStatus(status);
         m.setDataEntrada(parseData(dataEntrada));
         m.setDataSaida(parseData(dataSaida));
         m.setMotivo(motivo);
         m.setCusto(custo);
 
-        String erro = validarManutencao(m);
-        if (erro != null) {
-            return prepararFormManutencao(idVeiculo, m, model, erro);
-        }
-
         try {
-            manutencaoDAO.inserir(m, idVeiculo);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return prepararFormManutencao(idVeiculo, m, model, "Erro ao salvar manutenção!");
+            veiculoService.salvarManutencao(m, idVeiculo);
+            redirect.addFlashAttribute("sucesso", "Manutenção registrada com sucesso!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/veiculos/" + idVeiculo + "/editar";
     }
 
-    @GetMapping("/veiculos/{idVeiculo}/manutencoes/{idManutencao}/editar")
-    public String formEditarManutencao(@PathVariable int idVeiculo,
-                                       @PathVariable int idManutencao,
-                                       Model model) {
+    @PostMapping("/{idVeiculo}/manutencoes/{idManutencao}/deletar")
+    public String deletarManutencao(@PathVariable int idVeiculo, @PathVariable int idManutencao, RedirectAttributes redirect) {
         try {
-            Manutencao m = manutencaoDAO.buscarPorId(idManutencao);
-            if (m == null) {
-                return "redirect:/veiculos/" + idVeiculo + "/editar";
-            }
-            return prepararFormManutencao(idVeiculo, m, model, null);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "redirect:/veiculos/" + idVeiculo + "/editar";
-        }
-    }
-
-    @PostMapping("/veiculos/{idVeiculo}/manutencoes/{idManutencao}")
-    public String atualizarManutencao(@PathVariable int idVeiculo,
-                                      @PathVariable int idManutencao,
-                                      @RequestParam(required = false) String status,
-                                      @RequestParam(required = false) String dataEntrada,
-                                      @RequestParam(required = false) String dataSaida,
-                                      @RequestParam(required = false) String motivo,
-                                      @RequestParam(required = false) Integer custo,
-                                      Model model) {
-        Manutencao m = new Manutencao();
-        m.setId(idManutencao);
-        m.setStatus(status);
-        m.setDataEntrada(parseData(dataEntrada));
-        m.setDataSaida(parseData(dataSaida));
-        m.setMotivo(motivo);
-        m.setCusto(custo);
-
-        String erro = validarManutencao(m);
-        if (erro != null) {
-            return prepararFormManutencao(idVeiculo, m, model, erro);
-        }
-
-        try {
-            manutencaoDAO.atualizar(m);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return prepararFormManutencao(idVeiculo, m, model, "Erro ao atualizar manutenção!");
+            veiculoService.deletarManutencao(idManutencao);
+            redirect.addFlashAttribute("sucesso", "Registro de manutenção apagado!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/veiculos/" + idVeiculo + "/editar";
     }
 
-    @PostMapping("/veiculos/{idVeiculo}/manutencoes/{idManutencao}/deletar")
-    public String deletarManutencao(@PathVariable int idVeiculo, @PathVariable int idManutencao) {
+    private String prepararFormManutencao(int idVeiculo, Manutencao manutencao, Model model) {
         try {
-            manutencaoDAO.deletar(idManutencao);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return "redirect:/veiculos/" + idVeiculo + "/editar";
-    }
-
-    // ------------------- Helpers -------------------
-
-    private String prepararFormManutencao(int idVeiculo, Manutencao manutencao, Model model, String erro) {
-        try {
-            Veiculo veiculo = veiculoDAO.buscarPorId(idVeiculo);
-            if (veiculo == null) {
-                return "redirect:/veiculos";
-            }
+            Veiculo veiculo = veiculoService.buscarPorId(idVeiculo);
+            if (veiculo == null) return "redirect:/veiculos";
             model.addAttribute("veiculo", veiculo);
             model.addAttribute("manutencao", manutencao);
-            model.addAttribute("erro", erro);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             return "redirect:/veiculos";
         }
-        return "manutencao-form";
-    }
-
-    private String validarManutencao(Manutencao m) {
-        if (m.getStatus() == null || m.getStatus().isBlank()) {
-            return "Status é obrigatório.";
-        }
-        if (m.getDataEntrada() == null) {
-            return "Data de entrada é obrigatória.";
-        }
-        if (m.getDataSaida() != null && m.getDataSaida().isBefore(m.getDataEntrada())) {
-            return "Data de saída não pode ser anterior à data de entrada.";
-        }
-        return null;
+        return "veiculos/manutencao-form";
     }
 
     private LocalDateTime parseData(String value) {

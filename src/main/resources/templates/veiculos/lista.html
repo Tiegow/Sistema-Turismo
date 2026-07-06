@@ -1,0 +1,67 @@
+<html th:replace="~{fragments/layout :: page('Gestão de Frota', ~{::section})}">
+<section>
+    
+    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle me-2"></i> <span th:text="${sucesso}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> <span th:text="${erro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold m-0">Frota da Agência</h3>
+            <p class="text-muted small m-0">Controle de veículos e histórico de manutenção</p>
+        </div>
+        <a th:href="@{/veiculos/novo}" class="btn btn-primary fw-bold">
+            <i class="bi bi-plus-lg me-1"></i> Novo Veículo
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Placa</th>
+                        <th>Modelo / Descrição</th>
+                        <th>Capacidade (Lugares)</th>
+                        <th>Status Atual</th>
+                        <th class="text-end pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="v : ${veiculos}">
+                        <td class="ps-4 fw-bold text-dark" th:text="${v.placa}"></td>
+                        <td th:text="${v.modelo}"></td>
+                        <td th:text="${v.capacidade}"></td>
+                        <td>
+                            <!-- Um veículo está inoperante (em manutenção) se tiver uma ordem aberta (status != Concluído) -->
+                            <span th:with="ativa=${v.historicoManutencao != null and not #lists.isEmpty(v.historicoManutencao) and v.historicoManutencao[0].status != 'Concluído'}">
+                                <span th:if="${ativa}" class="badge bg-warning text-dark"><i class="bi bi-wrench"></i> Em Manutenção</span>
+                                <span th:unless="${ativa}" class="badge bg-success"><i class="bi bi-check-circle"></i> Operante</span>
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <a th:href="@{/veiculos/{id}/editar(id=${v.id})}" class="btn btn-sm btn-outline-primary" title="Editar / Ver Histórico">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form th:action="@{/veiculos/{id}/deletar(id=${v.id})}" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja apagar?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Apagar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(veiculos)}">
+                        <td colspan="5" class="text-center py-4 text-muted">Nenhum veículo na frota.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</html>

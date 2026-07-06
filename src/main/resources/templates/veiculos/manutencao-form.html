@@ -1,0 +1,64 @@
+<html th:replace="~{fragments/layout :: page('Ordem de Manutenção', ~{::section})}">
+<section>
+    
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> <span th:text="${erro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/veiculos/{id}/editar(id=${veiculo.id})}" class="btn btn-outline-secondary btn-sm me-3 shadow-sm">
+            <i class="bi bi-arrow-left"></i> Voltar ao Veículo
+        </a>
+        <h3 class="fw-bold m-0">Ordem de Manutenção</h3>
+    </div>
+
+    <div class="card shadow-sm border-0" style="max-width: 700px;">
+        <div class="card-header bg-light">
+            <span class="text-muted small">Veículo Afetado:</span>
+            <span class="fw-bold ms-1" th:text="${veiculo.placa} + ' - ' + ${veiculo.modelo}"></span>
+        </div>
+        <div class="card-body p-4">
+            <form th:action="@{/veiculos/{id}/manutencoes/salvar(id=${veiculo.id})}" method="post">
+                <input type="hidden" name="id" th:value="${manutencao.id}">
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Status da Ordem</label>
+                        <select class="form-select bg-light" name="status" required>
+                            <option value="Em Oficina" th:selected="${manutencao.status == 'Em Oficina'}">Em Oficina</option>
+                            <option value="Aguardando Peça" th:selected="${manutencao.status == 'Aguardando Peça'}">Aguardando Peça</option>
+                            <option value="Concluído" th:selected="${manutencao.status == 'Concluído'}">Concluído</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Custo Estimado/Real (R$)</label>
+                        <input type="number" class="form-control bg-light" name="custo" th:value="${manutencao.custo}" min="0">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Data de Entrada</label>
+                        <input type="datetime-local" class="form-control bg-light" name="dataEntrada" th:value="${manutencao.dataEntrada}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Data Prevista de Saída</label>
+                        <input type="datetime-local" class="form-control bg-light" name="dataSaida" th:value="${manutencao.dataSaida}">
+                        <div class="form-text small">Previsão da oficina (ou data exata de quando foi concluída).</div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Motivo / Descrição do Serviço</label>
+                        <textarea class="form-control bg-light" name="motivo" rows="4" th:text="${manutencao.motivo}"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-warning text-dark px-4 shadow-sm fw-bold">
+                        <i class="bi bi-save me-1"></i> Registrar Ordem
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+</html>

@@ -1,0 +1,66 @@
+<html th:replace="~{fragments/layout :: page('Gestão de Turistas', ~{::section})}">
+<section>
+    
+    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle me-2"></i> <span th:text="${sucesso}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> <span th:text="${erro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold m-0">Turistas Cadastrados</h3>
+            <p class="text-muted small m-0">Clientes da agência e seus acompanhantes</p>
+        </div>
+        <a th:href="@{/turistas/novo}" class="btn btn-warning text-dark fw-bold">
+            <i class="bi bi-person-plus me-1"></i> Novo Turista
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Nome Completo</th>
+                        <th>Documento</th>
+                        <th>Email / Telefone</th>
+                        <th>Acompanhantes</th>
+                        <th class="text-end pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="t : ${turistas}">
+                        <td class="ps-4 fw-bold text-dark" th:text="${t.nome}"></td>
+                        <td th:text="${t.identificacao}"></td>
+                        <td>
+                            <div th:text="${t.email}"></div>
+                            <small class="text-muted" th:text="${t.telefone}"></small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info text-dark rounded-pill" th:text="${#lists.size(t.acompanhantes)} + ' pessoa(s)'"></span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <a th:href="@{/turistas/{id}/editar(id=${t.id})}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form th:action="@{/turistas/{id}/deletar(id=${t.id})}" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja apagar este turista?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Apagar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(turistas)}">
+                        <td colspan="5" class="text-center py-4 text-muted">Nenhum turista cadastrado.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</html>

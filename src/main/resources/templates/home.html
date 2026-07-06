@@ -1,22 +1,63 @@
-<!DOCTYPE html>
-<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Sistema Turismo</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
-<body>
-    <div class="container">
-        <div class="card">
-            <h1>Sistema de Gestão Turística</h1>
-            <p>Bem-vindo!</p>
-            <div class="form-actions">
-                <a class="btn" href="/turistas">Ver Turistas</a>
-                <a class="btn btn-secondary" href="/colaboradores">Ver Colaboradores</a>
-                <a class="btn btn-secondary" href="/roteiros">Ver Roteiros</a>
-                <a class="btn btn-secondary" href="/veiculos">Ver Veículos</a>
+<html th:replace="~{fragments/layout :: page('Dashboard Central', ~{::section})}">
+<section>
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Bem-vindo ao TurismoDB</h2>
+            <p class="text-muted">Visão geral e atalhos rápidos para a operação da agência.</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Card Vendas -->
+        <div class="col-md-3">
+            <div class="card h-100 p-2 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-cart-check fs-1 text-primary mb-3 d-block"></i>
+                    <h5 class="card-title fw-bold">PDV</h5>
+                    <p class="card-text text-muted small">Venda passeios com bloqueio anti-overbooking.</p>
+                    <a href="/reservas" class="btn btn-primary mt-2 w-100 disabled">Em Breve</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Operacional -->
+        <div class="col-md-3">
+            <div class="card h-100 p-2 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event fs-1 text-success mb-3 d-block"></i>
+                    <h5 class="card-title fw-bold">Operação</h5>
+                    <p class="card-text text-muted small">Alocação de guias, motoristas e frota no calendário.</p>
+                    <a href="/passeios" class="btn btn-success mt-2 w-100 disabled">Em Breve</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Roteiros -->
+        <div class="col-md-3">
+            <div class="card h-100 p-2 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-map fs-1 text-info mb-3 d-block"></i>
+                    <h5 class="card-title fw-bold">Catálogo</h5>
+                    <p class="card-text text-muted small">Gerencie roteiros turísticos e reajuste os preços.</p>
+                    <a href="/roteiros" class="btn btn-info text-white mt-2 w-100">Acessar Roteiros</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Pessoas -->
+        <div class="col-md-3">
+            <div class="card h-100 p-2 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-people fs-1 text-warning mb-3 d-block"></i>
+                    <h5 class="card-title fw-bold">Cadastros</h5>
+                    <p class="card-text text-muted small">Turistas, Colaboradores, Guias e Veículos.</p>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="/turistas" class="btn btn-warning text-dark w-50" title="Turistas"><i class="bi bi-person"></i></a>
+                        <a href="/colaboradores" class="btn btn-warning text-dark w-50" title="Equipe"><i class="bi bi-briefcase"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</body>
+</section>
 </html>

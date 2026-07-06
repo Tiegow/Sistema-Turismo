@@ -1,0 +1,98 @@
+<html th:replace="~{fragments/layout :: page('Ficha do Veículo', ~{::section})}">
+<section>
+    
+    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle me-2"></i> <span th:text="${sucesso}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> <span th:text="${erro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/veiculos}" class="btn btn-outline-secondary btn-sm me-3 shadow-sm">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+        <h3 class="fw-bold m-0" th:text="${veiculo.id == null || veiculo.id == 0 ? 'Cadastrar Veículo' : 'Ficha do Veículo'}"></h3>
+    </div>
+
+    <div class="row g-4">
+        <!-- DADOS DO VEICULO -->
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white pb-0">
+                    <h6 class="fw-bold text-muted"><i class="bi bi-car-front-fill me-1"></i> Informações</h6>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/veiculos/salvar}" method="post">
+                        <input type="hidden" th:field="${veiculo.id}">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Placa</label>
+                            <input type="text" class="form-control bg-light text-uppercase" th:field="${veiculo.placa}" required maxlength="7" placeholder="ABC1234">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Modelo e Descrição</label>
+                            <input type="text" class="form-control bg-light" th:field="${veiculo.modelo}" required placeholder="Ex: Van Sprinter 415">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Capacidade Máxima (Lugares)</label>
+                            <input type="number" class="form-control bg-light" th:field="${veiculo.capacidade}" required min="1">
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary shadow-sm w-100">
+                                <i class="bi bi-save me-1"></i> Salvar Veículo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORICO MANUTENCAO -->
+        <div class="col-md-7" th:if="${veiculo.id != null && veiculo.id != 0}">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold text-muted m-0"><i class="bi bi-tools me-1"></i> Histórico de Manutenção</h6>
+                    <a th:href="@{/veiculos/{id}/manutencoes/novo(id=${veiculo.id})}" class="btn btn-sm btn-outline-warning text-dark fw-bold">
+                        <i class="bi bi-plus"></i> Registrar Ordem
+                    </a>
+                </div>
+                <div class="card-body p-0 table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th class="ps-3">Status</th>
+                                <th>Entrada</th>
+                                <th>Saída</th>
+                                <th>Motivo</th>
+                                <th class="text-end pe-3">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="small">
+                            <tr th:each="m : ${veiculo.historicoManutencao}">
+                                <td class="ps-3">
+                                    <span class="badge bg-secondary" th:if="${m.dataSaida != null}" th:text="${m.status}"></span>
+                                    <span class="badge bg-warning text-dark" th:if="${m.dataSaida == null}" th:text="${m.status}"></span>
+                                </td>
+                                <td th:text="${#temporals.format(m.dataEntrada, 'dd/MM/yyyy')}"></td>
+                                <td th:text="${m.dataSaida != null ? #temporals.format(m.dataSaida, 'dd/MM/yyyy') : '-'}"></td>
+                                <td class="text-truncate" style="max-width: 150px;" th:title="${m.motivo}" th:text="${m.motivo}"></td>
+                                <td class="text-end pe-3">
+                                    <a th:href="@{/veiculos/{idV}/manutencoes/{idM}/editar(idV=${veiculo.id}, idM=${m.id})}" class="btn btn-sm btn-link p-0 text-primary me-2"><i class="bi bi-pencil"></i></a>
+                                    <form th:action="@{/veiculos/{idV}/manutencoes/{idM}/deletar(idV=${veiculo.id}, idM=${m.id})}" method="post" class="d-inline" onsubmit="return confirm('Excluir este registro?');">
+                                        <button type="submit" class="btn btn-sm btn-link p-0 text-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(veiculo.historicoManutencao)}">
+                                <td colspan="5" class="text-center py-3 text-muted">Nenhuma manutenção registrada.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</html>

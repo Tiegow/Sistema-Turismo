@@ -1,0 +1,69 @@
+<html th:replace="~{fragments/layout :: page('Formulário de Roteiro', ~{::section})}">
+<section>
+    <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/roteiros}" class="btn btn-outline-secondary btn-sm me-3 shadow-sm">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+        <h3 class="fw-bold m-0" th:text="${roteiro.id == null || roteiro.id == 0 ? 'Cadastrar Novo Roteiro' : 'Editar Roteiro'}"></h3>
+    </div>
+
+    <div class="card shadow-sm border-0" style="max-width: 800px;">
+        <div class="card-body p-4">
+            <form th:action="@{/roteiros/salvar}" method="post">
+                <input type="hidden" th:field="${roteiro.id}">
+                
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Nome do Passeio</label>
+                        <input type="text" class="form-control bg-light" th:field="${roteiro.nome}" required placeholder="Ex: Rota do Pôr do Sol">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Preço de Venda (R$)</label>
+                        <input type="number" class="form-control bg-light" name="preco" th:value="${precoAtual}" required min="0">
+                        <div class="form-text text-muted" style="font-size: 0.75rem;">O histórico de preços é gravado automaticamente.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Modalidade</label>
+                        <select class="form-select bg-light" th:field="${roteiro.modalidade}" required>
+                            <option value="">Selecione...</option>
+                            <option value="Off-Road">Off-Road (Buggy/Quadriciclo)</option>
+                            <option value="Marítimo">Marítimo (Barco/Lancha)</option>
+                            <option value="Walking Tour">Walking Tour</option>
+                            <option value="Rodoviário">Rodoviário (Van/Ônibus)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Duração (Aproximada)</label>
+                        <input type="text" class="form-control bg-light" th:field="${roteiro.duracao}" required placeholder="Ex: 4 horas">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Descrição do Roteiro</label>
+                        <textarea class="form-control bg-light" th:field="${roteiro.descricao}" rows="4" required placeholder="Descreva os locais visitados e atrações..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Histórico de Preços (Visível apenas em edição) -->
+                <div class="mt-4" th:if="${roteiro.id != null && roteiro.id != 0 && not #lists.isEmpty(roteiro.historicoPrecos)}">
+                    <h6 class="fw-bold text-muted border-bottom pb-2"><i class="bi bi-clock-history me-1"></i> Histórico de Preços</h6>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center" th:each="precoObj : ${roteiro.historicoPrecos}">
+                            <span>
+                                <i class="bi bi-tag text-secondary me-2"></i>
+                                R$ <span th:text="${precoObj.preco}"></span>
+                            </span>
+                            <span th:if="${precoObj.ativo}" class="badge bg-success rounded-pill">Vigente</span>
+                            <span th:unless="${precoObj.ativo}" class="badge bg-secondary rounded-pill">Inativo</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                        <i class="bi bi-save me-1"></i> Salvar Roteiro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+</html>

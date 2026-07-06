@@ -1,0 +1,148 @@
+<html th:replace="~{fragments/layout :: page('Ficha do Colaborador', ~{::section})}">
+<section>
+    <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/colaboradores}" class="btn btn-outline-secondary btn-sm me-3 shadow-sm">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+        <h3 class="fw-bold m-0" th:text="${colaborador.id == null || colaborador.id == 0 ? 'Cadastrar Colaborador' : 'Editar Colaborador'}"></h3>
+    </div>
+
+    <form th:action="@{/colaboradores/salvar}" method="post">
+        <input type="hidden" th:field="${colaborador.id}">
+        
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white pb-0">
+                <h6 class="fw-bold text-muted"><i class="bi bi-person-badge me-1"></i> Dados Pessoais</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Nome Completo</label>
+                        <input type="text" class="form-control bg-light" th:field="${colaborador.nome}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Identificação (CPF/CNPJ)</label>
+                        <input type="text" class="form-control bg-light" th:field="${colaborador.identificacao}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Pessoa Jurídica?</label>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" th:field="${colaborador.pj}">
+                            <label class="form-check-label">É PJ</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Email</label>
+                        <input type="email" class="form-control bg-light" th:field="${colaborador.email}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Telefone</label>
+                        <input type="text" class="form-control bg-light" th:field="${colaborador.telefone}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Data Contratação</label>
+                        <input type="date" class="form-control bg-light" th:field="${colaborador.dataContratacao}" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- MOTORISTA -->
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-center">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="ehMotorista" id="checkMotorista" onchange="toggleMotorista()" th:checked="${jaMotorista}">
+                            <label class="form-check-label fw-bold text-muted" for="checkMotorista"><i class="bi bi-car-front-fill me-1"></i> É Motorista?</label>
+                        </div>
+                    </div>
+                    <div class="card-body" id="painelMotorista" style="display: none;">
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold">Número CNH</label>
+                                <input type="number" class="form-control bg-light" name="numeroCnh" th:value="${motorista.numeroCnh}">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold">Validade</label>
+                                <input type="date" class="form-control bg-light" name="validade" th:value="${motorista.validade}">
+                            </div>
+                        </div>
+                        
+                        <label class="form-label fw-bold">Categorias (A, B, C...)</label>
+                        <div id="cnh-container">
+                            <div th:each="cat, stat : ${motorista.categoriasCnh}" class="cnh-row mb-2 input-group">
+                                <input type="text" class="form-control bg-light" th:field="*{motorista.categoriasCnh[__${stat.index}__]}" maxlength="2">
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.cnh-row').remove()"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addCat()"><i class="bi bi-plus"></i> Adicionar Categoria</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GUIA -->
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-center">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="ehGuia" id="checkGuia" onchange="toggleGuia()" th:checked="${jaGuia}">
+                            <label class="form-check-label fw-bold text-muted" for="checkGuia"><i class="bi bi-megaphone-fill me-1"></i> É Guia Turístico?</label>
+                        </div>
+                    </div>
+                    <div class="card-body" id="painelGuia" style="display: none;">
+                        <label class="form-label fw-bold">Idiomas Fluentes</label>
+                        <div id="idioma-container">
+                            <div th:each="idioma, stat : ${guia.idiomas}" class="idioma-row mb-2 input-group">
+                                <input type="text" class="form-control bg-light" th:field="*{guia.idiomas[__${stat.index}__]}">
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.idioma-row').remove()"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addIdioma()"><i class="bi bi-plus"></i> Adicionar Idioma</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                <i class="bi bi-save me-1"></i> Salvar Registros
+            </button>
+        </div>
+    </form>
+
+    <script>
+        let catCount = document.querySelectorAll('.cnh-row').length;
+        let idiomaCount = document.querySelectorAll('.idioma-row').length;
+
+        function toggleMotorista() {
+            document.getElementById('painelMotorista').style.display = document.getElementById('checkMotorista').checked ? 'block' : 'none';
+        }
+        function toggleGuia() {
+            document.getElementById('painelGuia').style.display = document.getElementById('checkGuia').checked ? 'block' : 'none';
+        }
+
+        function addCat() {
+            let container = document.getElementById('cnh-container');
+            let div = document.createElement('div');
+            div.className = 'cnh-row mb-2 input-group';
+            div.innerHTML = `<input type="text" class="form-control bg-light" name="categoriasCnh[${catCount}]" maxlength="2">
+                             <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.cnh-row').remove()"><i class="bi bi-trash"></i></button>`;
+            container.appendChild(div);
+            catCount++;
+        }
+        function addIdioma() {
+            let container = document.getElementById('idioma-container');
+            let div = document.createElement('div');
+            div.className = 'idioma-row mb-2 input-group';
+            div.innerHTML = `<input type="text" class="form-control bg-light" name="idiomas[${idiomaCount}]">
+                             <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.idioma-row').remove()"><i class="bi bi-trash"></i></button>`;
+            container.appendChild(div);
+            idiomaCount++;
+        }
+
+        toggleMotorista();
+        toggleGuia();
+    </script>
+</section>
+</html>
