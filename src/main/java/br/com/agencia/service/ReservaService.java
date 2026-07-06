@@ -53,6 +53,14 @@ public class ReservaService {
         try {
             Passeio passeio = passeioDAO.buscarPorId(reserva.getPasseio().getId());
             if (passeio == null) throw new IllegalArgumentException("Passeio selecionado não é válido.");
+            
+            passeio.setRoteiro(roteiroDAO.buscarPorId(passeio.getRoteiro().getId()));
+            java.time.LocalDateTime inicio = passeio.getDataHora();
+            java.time.LocalDateTime fim = passeio.getDataHoraFim();
+
+            if (reservaDAO.verificarConflitoTurista(reserva.getTurista().getId(), inicio, fim, passeio.getId())) {
+                throw new IllegalArgumentException("Conflito de Agenda: O turista selecionado já possui uma reserva ativa para outro passeio no mesmo horário.");
+            }
 
             // Checagem de Overbooking
             int vagasExistentes = 0;

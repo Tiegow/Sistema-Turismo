@@ -35,6 +35,13 @@ public class Passeio {
 
     public LocalDateTime getDataHora() { return dataHora; }
     public void setDataHora(LocalDateTime dataHora) { this.dataHora = dataHora; }
+    
+    public LocalDateTime getDataHoraFim() {
+        if (dataHora == null || roteiro == null || roteiro.getDuracao() == null) {
+            return dataHora; // fallback caso incompleto
+        }
+        return dataHora.plusMinutes(roteiro.getDuracao());
+    }
 
     public Roteiro getRoteiro() { return roteiro; }
     public void setRoteiro(Roteiro roteiro) { this.roteiro = roteiro; }

@@ -5,7 +5,7 @@ import java.util.List;
 public class Roteiro {
     private Integer id;
     private String nome;
-    private String duracao;
+    private Integer duracao;
     private String modalidade;
     private String descricao;
 
@@ -19,8 +19,15 @@ public class Roteiro {
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 
-    public String getDuracao() { return duracao; }
-    public void setDuracao(String duracao) { this.duracao = duracao; }
+    public Integer getDuracao() { return duracao; }
+    public void setDuracao(Integer duracao) { this.duracao = duracao; }
+
+    public String getDuracaoFormatada() {
+        if (duracao == null) return "Não informada";
+        if (duracao >= 1440 && duracao % 1440 == 0) return (duracao / 1440) + " Dia(s)";
+        if (duracao >= 60 && duracao % 60 == 0) return (duracao / 60) + " Hora(s)";
+        return duracao + " Minutos";
+    }
 
     public String getModalidade() { return modalidade; }
     public void setModalidade(String modalidade) { this.modalidade = modalidade; }

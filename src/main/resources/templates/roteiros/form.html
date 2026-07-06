@@ -34,7 +34,14 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Duração (Aproximada)</label>
-                        <input type="text" class="form-control bg-light" th:field="${roteiro.duracao}" required placeholder="Ex: 4 horas">
+                        <div class="input-group">
+                            <input type="number" class="form-control bg-light" name="duracaoQtd" required min="1" placeholder="Ex: 4" th:value="${roteiro.duracao != null ? (roteiro.duracao >= 1440 && roteiro.duracao % 1440 == 0 ? roteiro.duracao / 1440 : (roteiro.duracao >= 60 && roteiro.duracao % 60 == 0 ? roteiro.duracao / 60 : roteiro.duracao)) : ''}">
+                            <select class="form-select bg-light" name="duracaoUnidade" required style="max-width: 140px;">
+                                <option value="Horas" th:selected="${roteiro.duracao == null || (roteiro.duracao >= 60 && roteiro.duracao % 60 == 0 && roteiro.duracao < 1440)}">Horas</option>
+                                <option value="Minutos" th:selected="${roteiro.duracao != null && (roteiro.duracao < 60 || roteiro.duracao % 60 != 0)}">Minutos</option>
+                                <option value="Dias" th:selected="${roteiro.duracao != null && roteiro.duracao >= 1440 && roteiro.duracao % 1440 == 0}">Dias</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="col-12">
                         <label class="form-label fw-bold">Descrição do Roteiro</label>

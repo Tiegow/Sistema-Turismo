@@ -283,4 +283,52 @@ public class PasseioDAO {
         }
         return lista;
     }
+
+    public boolean verificarConflitoColaborador(int idColaborador, LocalDateTime inicio, LocalDateTime fim, int idPasseioIgnorado) throws SQLException {
+        String sql = "SELECT count(*) as total FROM PASSEIO p " +
+                     "JOIN ROTEIRO r ON p.id_roteiro = r.id " +
+                     "JOIN COLABORADOR_ALOCADO ca ON ca.id_passeio = p.id " +
+                     "WHERE ca.id_colaborador = ? AND p.id != ? " +
+                     "  AND p.data_hora < ? " +
+                     "  AND DATE_ADD(p.data_hora, INTERVAL COALESCE(r.duracao, 0) MINUTE) > ?";
+        
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, idColaborador);
+            stmt.setInt(2, idPasseioIgnorado);
+            stmt.setTimestamp(3, Timestamp.valueOf(fim));
+            stmt.setTimestamp(4, Timestamp.valueOf(inicio));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total") > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean verificarConflitoVeiculo(int idVeiculo, LocalDateTime inicio, LocalDateTime fim, int idPasseioIgnorado) throws SQLException {
+        String sql = "SELECT count(*) as total FROM PASSEIO p " +
+                     "JOIN ROTEIRO r ON p.id_roteiro = r.id " +
+                     "JOIN VEICULO_ALOCADO va ON va.id_passeio = p.id " +
+                     "WHERE va.id_veiculo = ? AND p.id != ? " +
+                     "  AND p.data_hora < ? " +
+                     "  AND DATE_ADD(p.data_hora, INTERVAL COALESCE(r.duracao, 0) MINUTE) > ?";
+        
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, idVeiculo);
+            stmt.setInt(2, idPasseioIgnorado);
+            stmt.setTimestamp(3, Timestamp.valueOf(fim));
+            stmt.setTimestamp(4, Timestamp.valueOf(inicio));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total") > 0;
+                }
+            }
+        }
+        return false;
+    }
 }

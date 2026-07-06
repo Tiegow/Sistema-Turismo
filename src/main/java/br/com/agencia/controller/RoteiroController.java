@@ -47,8 +47,17 @@ public class RoteiroController {
     }
 
     @PostMapping("/salvar")
-    public String salvar(@ModelAttribute Roteiro roteiro, @RequestParam(required = false) Double preco, RedirectAttributes redirect) {
+    public String salvar(@ModelAttribute Roteiro roteiro, 
+                         @RequestParam(required = false) Double preco,
+                         @RequestParam(required = true) int duracaoQtd,
+                         @RequestParam(required = true) String duracaoUnidade, 
+                         RedirectAttributes redirect) {
         try {
+            int multiplicador = 1;
+            if ("Horas".equals(duracaoUnidade)) multiplicador = 60;
+            else if ("Dias".equals(duracaoUnidade)) multiplicador = 1440;
+            roteiro.setDuracao(duracaoQtd * multiplicador);
+
             roteiroService.salvar(roteiro, preco);
             redirect.addFlashAttribute("sucesso", "Roteiro salvo com sucesso!");
         } catch (Exception e) {

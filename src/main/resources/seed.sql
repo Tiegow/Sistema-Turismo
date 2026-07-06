@@ -16,7 +16,7 @@ INSERT INTO TURISTA (id_pessoa, forma_pagamento) VALUES (4, 'PIX');
 
 -- Guia (Maria id=2) e Motorista (Carlos id=3)
 INSERT INTO GUIA (id_colaborador) VALUES (2);
-INSERT INTO MOTORISTA (id_colaborador, numero_cnh, validade) VALUES (3, 123456789, '2028-12-31 23:59:59');
+INSERT INTO MOTORISTA (id_colaborador, numero_cnh, validade) VALUES (3, '123456789', '2028-12-31 23:59:59');
 
 -- Idiomas e CNH
 INSERT INTO IDIOMAS (id_guia, idioma) VALUES (2, 'Inglês');
@@ -24,18 +24,18 @@ INSERT INTO IDIOMAS (id_guia, idioma) VALUES (2, 'Espanhol');
 INSERT INTO CNH_CATEGORIAS (id_motorista, cnh_categoria) VALUES (3, 'D');
 
 -- Roteiro e Preço
-INSERT INTO ROTEIRO (nome, duracao, modalidade, descricao) VALUES ('City Tour Histórico', '4 horas', 'Walking Tour', 'Passeio a pé pelos principais pontos históricos do centro da cidade.');
-INSERT INTO ROTEIRO_PRECO (id_roteiro, data_cadastro, ativo, preco) VALUES (1, '2023-05-01 10:00:00', 1, 150);
+INSERT INTO ROTEIRO (nome, duracao, modalidade, descricao) VALUES ('City Tour Histórico', 240, 'Walking Tour', 'Passeio a pé pelos principais pontos históricos do centro da cidade.');
+INSERT INTO ROTEIRO_PRECO (id_roteiro, data_cadastro, ativo, preco) VALUES (1, '2023-05-01 10:00:00', 1, 150.00);
 
 -- Veículos (O ID será gerado automaticamente: 1)
 INSERT INTO VEICULO (placa, modelo, capacidade) VALUES ('ABC1234', 'Van Mercedes Sprinter', 15);
 
 -- Passeios
-INSERT INTO PASSEIO (preco, capacidade, data_hora, id_roteiro) VALUES (150, 15, '2027-10-15 09:00:00', 1);
+INSERT INTO PASSEIO (preco, capacidade, data_hora, id_roteiro) VALUES (150.00, 15, '2027-10-15 09:00:00', 1);
 
 -- Reservas (Ana reserva 2 vagas)
 INSERT INTO RESERVA (id_passeio, id_turista, qtd_vagas, pagamento_efetuado, valor_total, local_embarque) 
-VALUES (1, 4, 2, 1, 300, 'Hotel Central');
+VALUES (1, 4, 2, 1, 300.00, 'Hotel Central');
 
 -- Alocações (Usando os IDs criados: Maria=2, Carlos=3, Veiculo=1)
 INSERT INTO COLABORADOR_ALOCADO (id_colaborador, id_passeio) VALUES (2, 1);

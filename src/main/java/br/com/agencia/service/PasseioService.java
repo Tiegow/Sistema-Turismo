@@ -39,11 +39,42 @@ public class PasseioService {
 
     public void salvar(Passeio passeio) {
         try {
+            if (passeio.getRoteiro() != null && passeio.getRoteiro().getId() != null) {
+                Roteiro r = roteiroDAO.buscarPorId(passeio.getRoteiro().getId());
+                passeio.setRoteiro(r);
+            }
+
+            java.time.LocalDateTime inicio = passeio.getDataHora();
+            java.time.LocalDateTime fim = passeio.getDataHoraFim();
+            int idIgnorado = (passeio.getId() != null) ? passeio.getId() : 0;
+
+            if (passeio.getColaboradoresAlocados() != null) {
+                for (Colaborador c : passeio.getColaboradoresAlocados()) {
+                    if (passeioDAO.verificarConflitoColaborador(c.getId(), inicio, fim, idIgnorado)) {
+                        throw new IllegalArgumentException("Conflito de Escala: Colaborador(a) já alocado(a) em outro passeio neste horário.");
+                    }
+                }
+            }
+
+            if (passeio.getVeiculosAlocados() != null) {
+                br.com.agencia.dao.ManutencaoDAO manutencaoDAO = new br.com.agencia.dao.ManutencaoDAO();
+                for (Veiculo v : passeio.getVeiculosAlocados()) {
+                    if (passeioDAO.verificarConflitoVeiculo(v.getId(), inicio, fim, idIgnorado)) {
+                        throw new IllegalArgumentException("Conflito de Frota: Veículo já alocado em outro passeio neste horário.");
+                    }
+                    if (manutencaoDAO.verificarVeiculoEmManutencao(v.getId(), inicio, fim)) {
+                        throw new IllegalArgumentException("Conflito de Frota: Veículo indisponível (agendado para manutenção neste horário).");
+                    }
+                }
+            }
+
             if (passeio.getId() == null || passeio.getId() == 0) {
                 passeioDAO.inserir(passeio);
             } else {
                 passeioDAO.atualizar(passeio);
             }
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao agendar passeio. Verifique os dados inseridos.", e);
         }

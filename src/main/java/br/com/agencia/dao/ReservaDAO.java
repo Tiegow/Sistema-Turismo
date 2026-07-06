@@ -128,4 +128,28 @@ public class ReservaDAO {
         
         return r;
     }
+
+    public boolean verificarConflitoTurista(int idTurista, java.time.LocalDateTime inicio, java.time.LocalDateTime fim, int idPasseioIgnorado) throws SQLException {
+        String sql = "SELECT count(*) as total FROM PASSEIO p " +
+                     "JOIN ROTEIRO r ON p.id_roteiro = r.id " +
+                     "JOIN RESERVA res ON res.id_passeio = p.id " +
+                     "WHERE res.id_turista = ? AND p.id != ? " +
+                     "  AND p.data_hora < ? " +
+                     "  AND DATE_ADD(p.data_hora, INTERVAL COALESCE(r.duracao, 0) MINUTE) > ?";
+                     
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, idTurista);
+            stmt.setInt(2, idPasseioIgnorado);
+            stmt.setTimestamp(3, java.sql.Timestamp.valueOf(fim));
+            stmt.setTimestamp(4, java.sql.Timestamp.valueOf(inicio));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total") > 0;
+                }
+            }
+        }
+        return false;
+    }
 }

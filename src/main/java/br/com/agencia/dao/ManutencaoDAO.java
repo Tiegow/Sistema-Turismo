@@ -85,4 +85,21 @@ public class ManutencaoDAO {
             stmt.executeUpdate();
         }
     }
+
+    public boolean verificarVeiculoEmManutencao(int idVeiculo, LocalDateTime inicio, LocalDateTime fim) throws SQLException {
+        String sql = "SELECT count(*) as total FROM MANUTENCAO " +
+                     "WHERE id_veiculo = ? AND data_entrada < ? AND (data_saida IS NULL OR data_saida > ?)";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, idVeiculo);
+            stmt.setTimestamp(2, Timestamp.valueOf(fim));
+            stmt.setTimestamp(3, Timestamp.valueOf(inicio));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total") > 0;
+                }
+            }
+        }
+        return false;
+    }
 }

@@ -23,7 +23,7 @@ public class RoteiroDAO {
              PreparedStatement stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setString(1, roteiro.getNome());
-            stmt.setString(2, roteiro.getDuracao());
+            stmt.setInt(2, roteiro.getDuracao() != null ? roteiro.getDuracao() : 0);
             stmt.setString(3, roteiro.getModalidade());
             stmt.setString(4, roteiro.getDescricao());
             
@@ -78,7 +78,7 @@ public class RoteiroDAO {
              PreparedStatement stmt = con.prepareStatement(sql)) {
             
             stmt.setString(1, roteiro.getNome());
-            stmt.setString(2, roteiro.getDuracao());
+            stmt.setInt(2, roteiro.getDuracao() != null ? roteiro.getDuracao() : 0);
             stmt.setString(3, roteiro.getModalidade());
             stmt.setString(4, roteiro.getDescricao());
             stmt.setInt(5, roteiro.getId());
@@ -134,7 +134,7 @@ public class RoteiroDAO {
         Roteiro r = new Roteiro();
         r.setId(rs.getInt("id"));
         r.setNome(rs.getString("nome"));
-        r.setDuracao(rs.getString("duracao"));
+        r.setDuracao(rs.getInt("duracao"));
         r.setModalidade(rs.getString("modalidade"));
         r.setDescricao(rs.getString("descricao"));
         
