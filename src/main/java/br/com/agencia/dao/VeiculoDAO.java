@@ -136,7 +136,7 @@ public class VeiculoDAO {
                     m.setId(rs.getInt("id"));
                     m.setStatus(rs.getString("status"));
                     m.setMotivo(rs.getString("motivo"));
-                    m.setCusto(rs.getInt("custo"));
+                    m.setCusto(rs.getDouble("custo"));
                     
                     Timestamp de = rs.getTimestamp("data_entrada");
                     if (de != null) m.setDataEntrada(de.toLocalDateTime());

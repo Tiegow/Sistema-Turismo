@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Passeio {
     private Integer id;
-    private Integer preco;
+    private Double preco;
     private Integer capacidade;
     private LocalDateTime dataHora;
     private Roteiro roteiro; 
@@ -13,14 +13,22 @@ public class Passeio {
 
     private List<Veiculo> veiculosAlocados;
     private List<Colaborador> colaboradoresAlocados;
+    private Boolean alertaMotorista;
+    private Boolean alertaGuia;
 
     public Passeio() {}
+
+    public Boolean getAlertaMotorista() { return alertaMotorista; }
+    public void setAlertaMotorista(Boolean alertaMotorista) { this.alertaMotorista = alertaMotorista; }
+
+    public Boolean getAlertaGuia() { return alertaGuia; }
+    public void setAlertaGuia(Boolean alertaGuia) { this.alertaGuia = alertaGuia; }
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
-    public Integer getPreco() { return preco; }
-    public void setPreco(Integer preco) { this.preco = preco; }
+    public Double getPreco() { return preco; }
+    public void setPreco(Double preco) { this.preco = preco; }
 
     public Integer getCapacidade() { return capacidade; }
     public void setCapacidade(Integer capacidade) { this.capacidade = capacidade; }

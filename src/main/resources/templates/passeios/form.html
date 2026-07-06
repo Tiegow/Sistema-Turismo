@@ -1,0 +1,121 @@
+<html th:replace="~{fragments/layout :: page('Agendamento de Passeio', ~{::section})}">
+<section>
+    <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/passeios}" class="btn btn-outline-secondary btn-sm me-3 shadow-sm">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+        <h3 class="fw-bold m-0" th:text="${passeio.id == null || passeio.id == 0 ? 'Agendar Novo Passeio' : 'Editar Passeio'}"></h3>
+    </div>
+
+    <form th:action="@{/passeios/salvar}" method="post">
+        <input type="hidden" th:field="${passeio.id}">
+        
+        <div class="row g-4">
+            <!-- Dados Base -->
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white pb-0">
+                        <h6 class="fw-bold text-muted"><i class="bi bi-info-circle me-1"></i> Informações do Passeio</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Qual será o Roteiro?</label>
+                                <select class="form-select bg-light" th:field="${passeio.roteiro.id}" id="roteiroSelect" onchange="updatePreco()" required>
+                                    <option value="" data-preco="">Selecione um Roteiro do Catálogo...</option>
+                                    <option th:each="r : ${listaRoteiros}" th:value="${r.id}" th:text="${r.nome} + ' (' + ${r.modalidade} + ')'"
+                                            th:data-preco="${not #lists.isEmpty(r.historicoPrecos) ? r.historicoPrecos[0].preco : 0}"></option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Data e Hora de Saída</label>
+                                <input type="datetime-local" class="form-control bg-light" name="dataHoraStr" th:value="${passeio.dataHora}" required>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Vagas Totais</label>
+                                <input type="number" class="form-control bg-light" th:field="${passeio.capacidade}" required min="1">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Preço (R$)</label>
+                                <input type="number" step="0.01" class="form-control bg-light" th:field="${passeio.preco}" id="precoPasseio" required min="0">
+                            </div>
+                            
+                            <div class="col-12 mt-4" th:if="${passeio.id != null}">
+                                <div class="alert alert-info py-2 m-0 d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-people-fill me-2"></i> Status de Lotação:</span>
+                                    <strong th:text="${passeio.capacidade - passeio.vagasDisp} + ' Vendidas / ' + ${passeio.vagasDisp} + ' Disponíveis'"></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alocações (Escala) -->
+            <div class="col-md-5">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white pb-0">
+                        <h6 class="fw-bold text-muted"><i class="bi bi-truck me-1"></i> Escala e Alocação</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Veículos -->
+                        <div class="p-3 border-bottom">
+                            <label class="form-label fw-bold mb-2">Veículos Alocados</label>
+                            <div class="border rounded p-2 bg-light" style="max-height: 150px; overflow-y: auto;">
+                                <div class="form-check" th:each="v : ${listaVeiculos}">
+                                    <input class="form-check-input" type="checkbox" name="idVeiculos" th:value="${v.id}" th:id="'veiculo_' + ${v.id}"
+                                           th:checked="${passeio.veiculosAlocados != null and #lists.contains(passeio.veiculosAlocados.![id], v.id)}">
+                                    <label class="form-check-label" th:for="'veiculo_' + ${v.id}" th:text="${v.placa} + ' - ' + ${v.modelo} + ' (' + ${v.capacidade} + ' lug)'"></label>
+                                </div>
+                                <div th:if="${#lists.isEmpty(listaVeiculos)}" class="text-muted small">Nenhum veículo cadastrado no sistema.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Colaboradores -->
+                        <div class="p-3">
+                            <label class="form-label fw-bold mb-2">Guias e Motoristas Alocados</label>
+                            <div class="border rounded p-2 bg-light" style="max-height: 150px; overflow-y: auto;">
+                                <div class="form-check" th:each="c : ${listaColaboradores}">
+                                    <input class="form-check-input" type="checkbox" name="idColaboradores" th:value="${c.id}" th:id="'colab_' + ${c.id}"
+                                           th:checked="${passeio.colaboradoresAlocados != null and #lists.contains(passeio.colaboradoresAlocados.![id], c.id)}">
+                                    <label class="form-check-label" th:for="'colab_' + ${c.id}">
+                                        <span th:text="${c.nome}"></span>
+                                        <span th:if="${c.papeis != null and c.papeis.contains('Guia')}" class="badge bg-info text-dark ms-1" style="font-size: 0.7em;">Guia</span>
+                                        <span th:if="${c.papeis != null and c.papeis.contains('Motorista')}" class="badge bg-secondary ms-1" style="font-size: 0.7em;">Motorista</span>
+                                    </label>
+                                </div>
+                                <div th:if="${#lists.isEmpty(listaColaboradores)}" class="text-muted small">Nenhum colaborador cadastrado no sistema.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-success px-4 shadow-sm fw-bold">
+                <i class="bi bi-save me-1"></i> Agendar Passeio
+            </button>
+        </div>
+    </form>
+
+    <script>
+        function updatePreco() {
+            const select = document.getElementById('roteiroSelect');
+            const selectedOption = select.options[select.selectedIndex];
+            const preco = selectedOption.getAttribute('data-preco');
+            const inputPreco = document.getElementById('precoPasseio');
+            
+            // Só sobrescreve se o preço for maior que 0 e o input estiver vazio ou o usuário acabou de trocar de roteiro.
+            if (preco && preco !== "0") {
+                inputPreco.value = preco;
+            } else if (preco === "") {
+                inputPreco.value = "";
+            }
+        }
+    </script>
+</section>
+</html>

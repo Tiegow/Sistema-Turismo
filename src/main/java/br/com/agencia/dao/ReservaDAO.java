@@ -25,11 +25,24 @@ public class ReservaDAO {
             
             stmt.setInt(3, reserva.getQtdVagas() != null ? reserva.getQtdVagas() : 1);
             stmt.setBoolean(4, reserva.getPagamentoEfetuado() != null ? reserva.getPagamentoEfetuado() : false);
-            stmt.setInt(5, reserva.getValorTotal() != null ? reserva.getValorTotal() : 0);
+            stmt.setDouble(5, reserva.getValorTotal() != null ? reserva.getValorTotal() : 0.0);
             stmt.setString(6, reserva.getLocalEmbarque());
             
             stmt.executeUpdate();
         }
+    }
+
+    public List<Reserva> buscarTodos() throws SQLException {
+        List<Reserva> lista = new ArrayList<>();
+        String sql = "SELECT id_passeio, id_turista, qtd_vagas, pagamento_efetuado, valor_total, local_embarque FROM RESERVA";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                lista.add(extrairReserva(rs));
+            }
+        }
+        return lista;
     }
 
     public List<Reserva> buscarPorPasseio(int idPasseio) throws SQLException {
@@ -77,7 +90,7 @@ public class ReservaDAO {
             
             stmt.setInt(1, reserva.getQtdVagas() != null ? reserva.getQtdVagas() : 1);
             stmt.setBoolean(2, reserva.getPagamentoEfetuado() != null ? reserva.getPagamentoEfetuado() : false);
-            stmt.setInt(3, reserva.getValorTotal() != null ? reserva.getValorTotal() : 0);
+            stmt.setDouble(3, reserva.getValorTotal() != null ? reserva.getValorTotal() : 0.0);
             stmt.setString(4, reserva.getLocalEmbarque());
             
             stmt.setInt(5, reserva.getPasseio().getId());
@@ -110,7 +123,7 @@ public class ReservaDAO {
         
         r.setQtdVagas(rs.getInt("qtd_vagas"));
         r.setPagamentoEfetuado(rs.getBoolean("pagamento_efetuado"));
-        r.setValorTotal(rs.getInt("valor_total"));
+        r.setValorTotal(rs.getDouble("valor_total"));
         r.setLocalEmbarque(rs.getString("local_embarque"));
         
         return r;

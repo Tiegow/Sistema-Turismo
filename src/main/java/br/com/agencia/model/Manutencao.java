@@ -8,7 +8,7 @@ public class Manutencao {
     private LocalDateTime dataEntrada;
     private LocalDateTime dataSaida;
     private String motivo;
-    private Integer custo;
+    private Double custo;
     private Veiculo veiculo; 
 
     public Manutencao() {}
@@ -28,8 +28,8 @@ public class Manutencao {
     public String getMotivo() { return motivo; }
     public void setMotivo(String motivo) { this.motivo = motivo; }
 
-    public Integer getCusto() { return custo; }
-    public void setCusto(Integer custo) { this.custo = custo; }
+    public Double getCusto() { return custo; }
+    public void setCusto(Double custo) { this.custo = custo; }
 
     public Veiculo getVeiculo() { return veiculo; }
     public void setVeiculo(Veiculo veiculo) { this.veiculo = veiculo; }

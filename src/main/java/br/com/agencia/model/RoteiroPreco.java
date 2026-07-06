@@ -7,7 +7,7 @@ public class RoteiroPreco {
     private Roteiro roteiro;
     private LocalDateTime dataCadastro;
     private Boolean ativo;
-    private Integer preco;
+    private Double preco;
 
     public RoteiroPreco() {}
 
@@ -23,6 +23,6 @@ public class RoteiroPreco {
     public Boolean getAtivo() { return ativo; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
 
-    public Integer getPreco() { return preco; }
-    public void setPreco(Integer preco) { this.preco = preco; }
+    public Double getPreco() { return preco; }
+    public void setPreco(Double preco) { this.preco = preco; }
 }

@@ -5,7 +5,7 @@ public class Reserva {
     private Turista turista;
     private Integer qtdVagas;
     private Boolean pagamentoEfetuado;
-    private Integer valorTotal;
+    private Double valorTotal;
     private String localEmbarque;
 
     public Reserva() {}
@@ -22,8 +22,8 @@ public class Reserva {
     public Boolean getPagamentoEfetuado() { return pagamentoEfetuado; }
     public void setPagamentoEfetuado(Boolean pagamentoEfetuado) { this.pagamentoEfetuado = pagamentoEfetuado; }
 
-    public Integer getValorTotal() { return valorTotal; }
-    public void setValorTotal(Integer valorTotal) { this.valorTotal = valorTotal; }
+    public Double getValorTotal() { return valorTotal; }
+    public void setValorTotal(Double valorTotal) { this.valorTotal = valorTotal; }
 
     public String getLocalEmbarque() { return localEmbarque; }
     public void setLocalEmbarque(String localEmbarque) { this.localEmbarque = localEmbarque; }

@@ -6,15 +6,15 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class Motorista extends Colaborador {
-    private Integer numeroCnh;
+    private String numeroCnh;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate validade;
     private List<String> categoriasCnh;
 
     public Motorista() {}
 
-    public Integer getNumeroCnh() { return numeroCnh; }
-    public void setNumeroCnh(Integer numeroCnh) { this.numeroCnh = numeroCnh; }
+    public String getNumeroCnh() { return numeroCnh; }
+    public void setNumeroCnh(String numeroCnh) { this.numeroCnh = numeroCnh; }
 
     public LocalDate getValidade() { return validade; }
     public void setValidade(LocalDate validade) { this.validade = validade; }

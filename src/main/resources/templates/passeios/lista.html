@@ -1,0 +1,87 @@
+<html th:replace="~{fragments/layout :: page('Calendário de Passeios', ~{::section})}">
+<section>
+    
+    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle me-2"></i> <span th:text="${sucesso}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> <span th:text="${erro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold m-0">Calendário de Passeios</h3>
+            <p class="text-muted small m-0">Agendamentos, alocação de frota e controle de ocupação</p>
+        </div>
+        <a th:href="@{/passeios/novo}" class="btn btn-success fw-bold text-white">
+            <i class="bi bi-calendar-plus me-1"></i> Agendar Novo Passeio
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Data e Roteiro</th>
+                        <th>Alocações (Equipe/Frota)</th>
+                        <th>Vendas (Ocupação)</th>
+                        <th>Valor Nominal</th>
+                        <th class="text-end pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${passeios}">
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark mb-1">
+                                <i class="bi bi-calendar-event me-1 text-primary"></i> 
+                                <span th:text="${#temporals.format(p.dataHora, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                            <span class="text-muted small" th:text="${p.roteiro.nome}"></span>
+                        </td>
+                        <td>
+                            <div class="small">
+                                <span class="badge bg-secondary me-1" th:text="${#lists.size(p.veiculosAlocados)} + ' Veículo(s)'"></span>
+                                <span class="badge bg-secondary" th:text="${#lists.size(p.colaboradoresAlocados)} + ' Guia/Motorista(s)'"></span>
+                            </div>
+                            <div th:if="${p.alertaMotorista}" class="text-danger small mt-1 fw-bold">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Faltam motoristas!
+                            </div>
+                            <div th:if="${p.alertaGuia}" class="text-warning small mt-1 fw-bold text-dark">
+                                <i class="bi bi-megaphone-fill"></i> Falta guia turístico!
+                            </div>
+                        </td>
+                        <td>
+                            <span th:if="${p.vagasDisp > 0}" class="badge bg-success rounded-pill">
+                                <span th:text="${p.capacidade - p.vagasDisp}"></span>/<span th:text="${p.capacidade}"></span> Ocupadas
+                            </span>
+                            <span th:if="${p.vagasDisp <= 0}" class="badge bg-danger rounded-pill">
+                                ESGOTADO (<span th:text="${p.capacidade}"></span>/<span th:text="${p.capacidade}"></span>)
+                            </span>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-success" th:text="'R$ ' + ${p.preco}"></span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <a th:href="@{/passeios/{id}/editar(id=${p.id})}" class="btn btn-sm btn-outline-primary" title="Editar Escala">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form th:action="@{/passeios/{id}/deletar(id=${p.id})}" method="post" class="d-inline" onsubmit="return confirm('ATENÇÃO: Cancelar este passeio removerá as alocações. Confirmar?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar Passeio">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(passeios)}">
+                        <td colspan="5" class="text-center py-5 text-muted">Nenhum passeio agendado para os próximos dias.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</html>

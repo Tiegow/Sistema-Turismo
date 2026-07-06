@@ -19,7 +19,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Preço de Venda (R$)</label>
-                        <input type="number" class="form-control bg-light" name="preco" th:value="${precoAtual}" required min="0">
+                        <input type="number" step="0.01" class="form-control bg-light" name="preco" th:value="${precoAtual}" required min="0">
                         <div class="form-text text-muted" style="font-size: 0.75rem;">O histórico de preços é gravado automaticamente.</div>
                     </div>
                     <div class="col-md-6">
@@ -38,7 +38,7 @@
                     </div>
                     <div class="col-12">
                         <label class="form-label fw-bold">Descrição do Roteiro</label>
-                        <textarea class="form-control bg-light" th:field="${roteiro.descricao}" rows="4" required placeholder="Descreva os locais visitados e atrações..."></textarea>
+                        <textarea class="form-control bg-light" th:field="${roteiro.descricao}" rows="4" placeholder="Descreva os locais visitados e atrações..."></textarea>
                     </div>
                 </div>
 

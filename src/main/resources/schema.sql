@@ -39,8 +39,8 @@ CREATE TABLE IF NOT EXISTS GUIA (
 
 CREATE TABLE IF NOT EXISTS MOTORISTA (
     id_colaborador INT PRIMARY KEY,
-    numero_cnh INT NOT NULL,
-    validade DATETIME,
+    numero_cnh VARCHAR(20) UNIQUE NOT NULL,
+    validade DATE NOT NULL,
     FOREIGN KEY (id_colaborador) REFERENCES COLABORADOR(id_pessoa)
 );
 
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS IDIOMAS (
 
 CREATE TABLE IF NOT EXISTS CNH_CATEGORIAS (
     id_motorista INT,
-    cnh_categoria VARCHAR(30),
+    cnh_categoria CHAR(2),
     PRIMARY KEY (id_motorista, cnh_categoria),
     FOREIGN KEY (id_motorista) REFERENCES MOTORISTA(id_colaborador)
 );
@@ -70,20 +70,19 @@ CREATE TABLE IF NOT EXISTS ROTEIRO (
 
 CREATE TABLE IF NOT EXISTS ROTEIRO_PRECO (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    id_roteiro INT NOT NULL,
-    data_cadastro DATETIME NOT NULL,
-    ativo TINYINT NOT NULL,
-    preco INT,
-    UNIQUE (id_roteiro, data_cadastro),
+    id_roteiro INT,
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ativo BOOLEAN DEFAULT TRUE,
+    preco DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (id_roteiro) REFERENCES ROTEIRO(id)
 );
 
 CREATE TABLE IF NOT EXISTS PASSEIO (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    preco INT,
-    capacidade INT,
-    data_hora DATETIME,
-    id_roteiro INT NOT NULL,
+    id_roteiro INT,
+    data_hora DATETIME NOT NULL,
+    capacidade INT NOT NULL,
+    preco DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (id_roteiro) REFERENCES ROTEIRO(id)
 );
 
@@ -100,7 +99,7 @@ CREATE TABLE IF NOT EXISTS MANUTENCAO (
     data_entrada DATETIME NOT NULL,
     data_saida DATETIME,
     motivo VARCHAR(80),
-    custo INT,
+    custo DECIMAL(10,2),
     id_veiculo INT NOT NULL,
     FOREIGN KEY (id_veiculo) REFERENCES VEICULO(id)
 );
@@ -112,7 +111,7 @@ CREATE TABLE IF NOT EXISTS RESERVA (
     id_turista INT,
     qtd_vagas INT,
     pagamento_efetuado TINYINT,
-    valor_total INT,
+    valor_total DECIMAL(10,2) NOT NULL,
     local_embarque VARCHAR(45),
     PRIMARY KEY (id_passeio, id_turista),
     FOREIGN KEY (id_passeio) REFERENCES PASSEIO(id),

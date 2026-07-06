@@ -52,6 +52,37 @@ public class ColaboradorDAO extends AbstractPessoaDAO {
         return lista;
     }
 
+    public List<Colaborador> buscarTodosComPapeis() throws SQLException {
+        List<Colaborador> lista = new ArrayList<>();
+        String sql = "SELECT p.id, p.identificacao, p.nome, p.email, p.telefone, c.data_contratacao, c.pj, " +
+                     "(g.id_colaborador IS NOT NULL) AS is_guia, " +
+                     "(m.id_colaborador IS NOT NULL) AS is_motorista " +
+                     "FROM COLABORADOR c " +
+                     "JOIN PESSOA p ON c.id_pessoa = p.id " +
+                     "LEFT JOIN GUIA g ON g.id_colaborador = c.id_pessoa " +
+                     "LEFT JOIN MOTORISTA m ON m.id_colaborador = c.id_pessoa";
+
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Colaborador c = extrairColaborador(rs);
+                
+                boolean isGuia = rs.getBoolean("is_guia");
+                boolean isMotorista = rs.getBoolean("is_motorista");
+                
+                String papeis = "";
+                if (isGuia) papeis += "Guia ";
+                if (isMotorista) papeis += "Motorista";
+                c.setPapeis(papeis.trim());
+                
+                lista.add(c);
+            }
+        }
+        return lista;
+    }
+
     public Colaborador buscarPorId(int id) throws SQLException {
         Colaborador c = null;
         String sql = "SELECT p.id, p.identificacao, p.nome, p.email, p.telefone, c.data_contratacao, c.pj " +

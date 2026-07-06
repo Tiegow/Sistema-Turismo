@@ -61,7 +61,7 @@
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <label class="form-label fw-bold">Número CNH</label>
-                                <input type="number" class="form-control bg-light" name="numeroCnh" th:value="${motorista.numeroCnh}">
+                                <input type="text" class="form-control bg-light" name="numeroCnh" th:value="${motorista.numeroCnh}">
                             </div>
                             <div class="col-6">
                                 <label class="form-label fw-bold">Validade</label>
@@ -72,7 +72,17 @@
                         <label class="form-label fw-bold">Categorias (A, B, C...)</label>
                         <div id="cnh-container">
                             <div th:each="cat, stat : ${motorista.categoriasCnh}" class="cnh-row mb-2 input-group">
-                                <input type="text" class="form-control bg-light" th:field="*{motorista.categoriasCnh[__${stat.index}__]}" maxlength="2">
+                                <select class="form-select bg-light" th:field="*{motorista.categoriasCnh[__${stat.index}__]}">
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                    <option value="E">E</option>
+                                    <option value="AB">AB</option>
+                                    <option value="AC">AC</option>
+                                    <option value="AD">AD</option>
+                                    <option value="AE">AE</option>
+                                </select>
                                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.cnh-row').remove()"><i class="bi bi-trash"></i></button>
                             </div>
                         </div>
@@ -126,7 +136,17 @@
             let container = document.getElementById('cnh-container');
             let div = document.createElement('div');
             div.className = 'cnh-row mb-2 input-group';
-            div.innerHTML = `<input type="text" class="form-control bg-light" name="categoriasCnh[${catCount}]" maxlength="2">
+            div.innerHTML = `<select class="form-select bg-light" name="categoriasCnh[${catCount}]">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="AB">AB</option>
+                                <option value="AC">AC</option>
+                                <option value="AD">AD</option>
+                                <option value="AE">AE</option>
+                             </select>
                              <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.cnh-row').remove()"><i class="bi bi-trash"></i></button>`;
             container.appendChild(div);
             catCount++;

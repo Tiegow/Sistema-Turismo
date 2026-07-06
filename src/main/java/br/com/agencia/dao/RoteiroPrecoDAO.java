@@ -24,7 +24,7 @@ public class RoteiroPrecoDAO {
             stmt.setTimestamp(2, Timestamp.valueOf(dataCadastro));
             
             stmt.setBoolean(3, preco.getAtivo() != null ? preco.getAtivo() : true);
-            stmt.setInt(4, preco.getPreco() != null ? preco.getPreco() : 0);
+            stmt.setDouble(4, preco.getPreco() != null ? preco.getPreco() : 0.0);
             
             stmt.executeUpdate();
         }
@@ -54,7 +54,7 @@ public class RoteiroPrecoDAO {
                     preco = new RoteiroPreco();
                     preco.setId(rs.getInt("id"));
                     preco.setAtivo(rs.getBoolean("ativo"));
-                    preco.setPreco(rs.getInt("preco"));
+                    preco.setPreco(rs.getDouble("preco"));
                     
                     Timestamp data = rs.getTimestamp("data_cadastro");
                     if (data != null) {

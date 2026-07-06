@@ -26,7 +26,7 @@ public class ManutencaoDAO {
                     m.setId(rs.getInt("id"));
                     m.setStatus(rs.getString("status"));
                     m.setMotivo(rs.getString("motivo"));
-                    m.setCusto(rs.getInt("custo"));
+                    m.setCusto(rs.getDouble("custo"));
 
                     Timestamp de = rs.getTimestamp("data_entrada");
                     if (de != null) m.setDataEntrada(de.toLocalDateTime());
@@ -51,7 +51,7 @@ public class ManutencaoDAO {
             
             stmt.setTimestamp(3, m.getDataSaida() != null ? Timestamp.valueOf(m.getDataSaida()) : null);
             stmt.setString(4, m.getMotivo());
-            stmt.setInt(5, m.getCusto() != null ? m.getCusto() : 0);
+            stmt.setDouble(5, m.getCusto() != null ? m.getCusto() : 0.0);
             stmt.setInt(6, idVeiculo);
             
             stmt.executeUpdate();
@@ -70,7 +70,7 @@ public class ManutencaoDAO {
             
             stmt.setTimestamp(3, m.getDataSaida() != null ? Timestamp.valueOf(m.getDataSaida()) : null);
             stmt.setString(4, m.getMotivo());
-            stmt.setInt(5, m.getCusto() != null ? m.getCusto() : 0);
+            stmt.setDouble(5, m.getCusto() != null ? m.getCusto() : 0.0);
             stmt.setInt(6, m.getId());
             
             stmt.executeUpdate();

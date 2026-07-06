@@ -20,7 +20,7 @@ public class MotoristaDAO extends AbstractPessoaDAO {
                 String sqlMot = "INSERT INTO MOTORISTA (id_colaborador, numero_cnh, validade) VALUES (?, ?, ?)";
                 try (PreparedStatement stmt = con.prepareStatement(sqlMot)) {
                     stmt.setInt(1, m.getId());
-                    stmt.setInt(2, m.getNumeroCnh() != null ? m.getNumeroCnh() : 0);
+                    stmt.setString(2, m.getNumeroCnh());
                     stmt.setTimestamp(3, m.getValidade() != null ? Timestamp.valueOf(m.getValidade().atStartOfDay()) : null);
                     stmt.executeUpdate();
                 }
@@ -89,7 +89,7 @@ public class MotoristaDAO extends AbstractPessoaDAO {
             try {
                 String sqlMot = "UPDATE MOTORISTA SET numero_cnh = ?, validade = ? WHERE id_colaborador = ?";
                 try (PreparedStatement stmt = con.prepareStatement(sqlMot)) {
-                    stmt.setInt(1, m.getNumeroCnh() != null ? m.getNumeroCnh() : 0);
+                    stmt.setString(1, m.getNumeroCnh());
                     stmt.setTimestamp(2, m.getValidade() != null ? Timestamp.valueOf(m.getValidade().atStartOfDay()) : null);
                     stmt.setInt(3, m.getId());
                     stmt.executeUpdate();
@@ -150,7 +150,7 @@ public class MotoristaDAO extends AbstractPessoaDAO {
         }
         m.setPj(rs.getBoolean("pj"));
         
-        m.setNumeroCnh(rs.getInt("numero_cnh"));
+        m.setNumeroCnh(rs.getString("numero_cnh"));
         Timestamp dtVal = rs.getTimestamp("validade");
         if (dtVal != null) {
             m.setValidade(dtVal.toLocalDateTime().toLocalDate());

@@ -92,7 +92,7 @@ public class VeiculoController {
                                    @RequestParam(required = false) String dataEntrada,
                                    @RequestParam(required = false) String dataSaida,
                                    @RequestParam(required = false) String motivo,
-                                   @RequestParam(required = false) Integer custo,
+                                   @RequestParam(required = false) Double custo,
                                    RedirectAttributes redirect) {
         Manutencao m = new Manutencao();
         m.setId(id);

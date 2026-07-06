@@ -1,0 +1,94 @@
+<html th:replace="~{fragments/layout :: page('Checkout de Reserva', ~{::section})}">
+<section>
+    
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> <strong th:text="${erro}"></strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/reservas}" class="btn btn-outline-secondary btn-sm me-3 shadow-sm">
+            <i class="bi bi-arrow-left"></i> Voltar ao PDV
+        </a>
+        <h3 class="fw-bold m-0 text-success">
+            <i class="bi bi-credit-card-2-front me-2"></i>
+            <span th:text="${reserva.passeio == null || reserva.passeio.id == null ? 'Nova Venda' : 'Editar Venda'}"></span>
+        </h3>
+    </div>
+
+    <div class="card shadow-sm border-0" style="max-width: 800px; margin: 0 auto;">
+        <div class="card-header bg-light pb-0">
+            <h6 class="fw-bold text-muted"><i class="bi bi-cart-check me-1"></i> Informações do Checkout</h6>
+        </div>
+        <div class="card-body p-4">
+            <form th:action="@{/reservas/salvar}" method="post">
+                
+                <div class="row g-4">
+                    <!-- Cliente -->
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Selecione o Cliente (Turista Titular)</label>
+                        <select class="form-select bg-light" name="idTurista" required th:disabled="${reserva.turista != null && reserva.turista.id != null}">
+                            <option value="">Selecione na base de clientes...</option>
+                            <option th:each="t : ${listaTuristas}" th:value="${t.id}" th:text="${t.nome} + ' (Tel: ' + ${t.telefone} + ')'"
+                                    th:selected="${reserva.turista != null && reserva.turista.id == t.id}"></option>
+                        </select>
+                        <!-- Hack para quando o select tá disabled (na edição) enviar o valor mesmo assim -->
+                        <input type="hidden" name="idTurista" th:if="${reserva.turista != null && reserva.turista.id != null}" th:value="${reserva.turista.id}">
+                        <div class="form-text small text-muted"><i class="bi bi-info-circle"></i> O cliente precisa ser cadastrado na aba Turistas antes da venda.</div>
+                    </div>
+
+                    <!-- Passeio -->
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Qual Passeio ele quer comprar?</label>
+                        <select class="form-select bg-light" name="idPasseio" required th:disabled="${reserva.passeio != null && reserva.passeio.id != null}">
+                            <option value="">Selecione o Passeio agendado...</option>
+                            <option th:each="p : ${listaPasseios}" th:value="${p.id}" 
+                                    th:text="${p.roteiro.nome} + ' - ' + ${#temporals.format(p.dataHora, 'dd/MM/yyyy HH:mm')} + ' (R$ ' + ${p.preco} + ' unitário)'"
+                                    th:selected="${reserva.passeio != null && reserva.passeio.id == p.id}"></option>
+                        </select>
+                        <input type="hidden" name="idPasseio" th:if="${reserva.passeio != null && reserva.passeio.id != null}" th:value="${reserva.passeio.id}">
+                    </div>
+
+                    <!-- Detalhes da Venda -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Nº de Assentos</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-person-plus"></i></span>
+                            <input type="number" class="form-control bg-light" th:field="${reserva.qtdVagas}" required min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Local de Embarque Combinado</label>
+                        <input type="text" class="form-control bg-light" th:field="${reserva.localEmbarque}" placeholder="Ex: Recepção do Hotel XYZ" required>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" th:field="${reserva.pagamentoEfetuado}" id="pagamentoSwitch">
+                            <label class="form-check-label fw-bold text-success" for="pagamentoSwitch">Pagamento Integral Efetuado?</label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <div th:if="${reserva.valorTotal != null && reserva.valorTotal > 0}">
+                        <span class="text-muted">Valor Processado Anterioremente:</span>
+                        <h4 class="fw-bold text-success m-0" th:text="'R$ ' + ${reserva.valorTotal}"></h4>
+                    </div>
+                    <div th:unless="${reserva.valorTotal != null && reserva.valorTotal > 0}">
+                        <span class="text-muted small">O valor total será calculado automaticamente.</span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success px-5 shadow-sm fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Concluir Venda
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</section>
+</html>

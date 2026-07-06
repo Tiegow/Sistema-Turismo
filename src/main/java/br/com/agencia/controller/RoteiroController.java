@@ -47,7 +47,7 @@ public class RoteiroController {
     }
 
     @PostMapping("/salvar")
-    public String salvar(@ModelAttribute Roteiro roteiro, @RequestParam(required = false) Integer preco, RedirectAttributes redirect) {
+    public String salvar(@ModelAttribute Roteiro roteiro, @RequestParam(required = false) Double preco, RedirectAttributes redirect) {
         try {
             roteiroService.salvar(roteiro, preco);
             redirect.addFlashAttribute("sucesso", "Roteiro salvo com sucesso!");

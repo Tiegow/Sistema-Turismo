@@ -8,6 +8,7 @@ public class Colaborador extends Pessoa {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataContratacao;
     private Boolean pj;
+    private String papeis = "";
 
     public Colaborador() {}
 
@@ -16,4 +17,7 @@ public class Colaborador extends Pessoa {
 
     public Boolean getPj() { return pj; }
     public void setPj(Boolean pj) { this.pj = pj; }
+
+    public String getPapeis() { return papeis; }
+    public void setPapeis(String papeis) { this.papeis = papeis; }
 }

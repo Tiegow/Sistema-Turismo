@@ -26,7 +26,7 @@ public class PasseioDAO {
             con.setAutoCommit(false);
             try {
                 try (PreparedStatement stmt = con.prepareStatement(sqlPasseio, Statement.RETURN_GENERATED_KEYS)) {
-                    stmt.setInt(1, passeio.getPreco() != null ? passeio.getPreco() : 0);
+                    stmt.setDouble(1, passeio.getPreco() != null ? passeio.getPreco() : 0.0);
                     stmt.setInt(2, passeio.getCapacidade() != null ? passeio.getCapacidade() : 0);
                     
                     LocalDateTime dt = passeio.getDataHora() != null ? passeio.getDataHora() : LocalDateTime.now();
@@ -61,7 +61,7 @@ public class PasseioDAO {
 
     public List<Passeio> buscarTodos() throws SQLException {
         List<Passeio> lista = new ArrayList<>();
-        String sql = "SELECT id, preco, capacidade, data_hora, id_roteiro FROM PASSEIO";
+        String sql = "SELECT p.id, p.preco, p.capacidade, p.data_hora, p.id_roteiro, r.nome as roteiro_nome FROM PASSEIO p JOIN ROTEIRO r ON p.id_roteiro = r.id";
 
         try (Connection con = ConnectionFactory.getConnection();
              PreparedStatement stmt = con.prepareStatement(sql);
@@ -76,7 +76,7 @@ public class PasseioDAO {
 
     public Passeio buscarPorId(int id) throws SQLException {
         Passeio p = null;
-        String sql = "SELECT id, preco, capacidade, data_hora, id_roteiro FROM PASSEIO WHERE id = ?";
+        String sql = "SELECT p.id, p.preco, p.capacidade, p.data_hora, p.id_roteiro, r.nome as roteiro_nome FROM PASSEIO p JOIN ROTEIRO r ON p.id_roteiro = r.id WHERE p.id = ?";
 
         try (Connection con = ConnectionFactory.getConnection();
              PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -98,7 +98,7 @@ public class PasseioDAO {
             con.setAutoCommit(false);
             try {
                 try (PreparedStatement stmt = con.prepareStatement(sqlPasseio)) {
-                    stmt.setInt(1, passeio.getPreco() != null ? passeio.getPreco() : 0);
+                    stmt.setDouble(1, passeio.getPreco() != null ? passeio.getPreco() : 0.0);
                     stmt.setInt(2, passeio.getCapacidade() != null ? passeio.getCapacidade() : 0);
                     
                     LocalDateTime dt = passeio.getDataHora() != null ? passeio.getDataHora() : LocalDateTime.now();
@@ -181,7 +181,7 @@ public class PasseioDAO {
     private Passeio extrairPasseio(ResultSet rs, Connection con) throws SQLException {
         Passeio p = new Passeio();
         p.setId(rs.getInt("id"));
-        p.setPreco(rs.getInt("preco"));
+        p.setPreco(rs.getDouble("preco"));
         p.setCapacidade(rs.getInt("capacidade"));
         
         Timestamp dt = rs.getTimestamp("data_hora");
@@ -189,12 +189,16 @@ public class PasseioDAO {
         
         Roteiro r = new Roteiro();
         r.setId(rs.getInt("id_roteiro"));
+        r.setNome(rs.getString("roteiro_nome"));
         p.setRoteiro(r); 
 
         p.setVagasDisp(calcularVagasDisponiveis(p, con));
 
         p.setVeiculosAlocados(buscarVeiculosAlocados(p.getId(), con));
         p.setColaboradoresAlocados(buscarColaboradoresAlocados(p.getId(), con));
+        
+        p.setAlertaMotorista(verificarAlertaMotorista(p.getId(), p.getVeiculosAlocados().size(), con));
+        p.setAlertaGuia(verificarAlertaGuia(p.getId(), con));
 
         return p;
     }
@@ -211,6 +215,39 @@ public class PasseioDAO {
             }
         }
         return p.getCapacidade() - vagasOcupadas;
+    }
+
+    private boolean verificarAlertaMotorista(int idPasseio, int qtdVeiculos, Connection con) throws SQLException {
+        if (qtdVeiculos == 0) return false; 
+        int qtdMotoristas = 0;
+        String sql = "SELECT count(*) as total FROM COLABORADOR_ALOCADO ca " +
+                     "JOIN MOTORISTA m ON ca.id_colaborador = m.id_colaborador " +
+                     "WHERE ca.id_passeio = ?";
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, idPasseio);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    qtdMotoristas = rs.getInt("total");
+                }
+            }
+        }
+        return qtdMotoristas < qtdVeiculos;
+    }
+
+    private boolean verificarAlertaGuia(int idPasseio, Connection con) throws SQLException {
+        int qtdGuias = 0;
+        String sql = "SELECT count(*) as total FROM COLABORADOR_ALOCADO ca " +
+                     "JOIN GUIA g ON ca.id_colaborador = g.id_colaborador " +
+                     "WHERE ca.id_passeio = ?";
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, idPasseio);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    qtdGuias = rs.getInt("total");
+                }
+            }
+        }
+        return qtdGuias == 0;
     }
 
     private List<Veiculo> buscarVeiculosAlocados(int idPasseio, Connection con) throws SQLException {

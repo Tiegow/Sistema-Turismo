@@ -154,7 +154,7 @@ public class RoteiroDAO {
                     RoteiroPreco rp = new RoteiroPreco();
                     rp.setId(rs.getInt("id"));
                     rp.setAtivo(rs.getBoolean("ativo"));
-                    rp.setPreco(rs.getInt("preco"));
+                    rp.setPreco(rs.getDouble("preco"));
                     
                     Timestamp data = rs.getTimestamp("data_cadastro");
                     if (data != null) {

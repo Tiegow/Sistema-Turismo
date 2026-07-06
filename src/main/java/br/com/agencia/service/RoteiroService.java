@@ -44,7 +44,7 @@ public class RoteiroService {
         }
     }
 
-    public void salvar(Roteiro roteiro, Integer novoPreco) {
+    public void salvar(Roteiro roteiro, Double novoPreco) {
         try {
             if (roteiro.getId() == null || roteiro.getId() == 0) {
                 // Inserir 
