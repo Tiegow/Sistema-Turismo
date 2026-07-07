@@ -1,4 +1,4 @@
-<html th:replace="~{fragments/layout :: page('Checkout de Reserva', ~{::section})}">
+<html th:replace="~{fragments/layout :: page('Gestão de Reservas', ~{::section})}">
 <section>
     
     <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
@@ -16,7 +16,7 @@
         </h3>
     </div>
 
-    <div class="card shadow-sm border-0" style="max-width: 800px; margin: 0 auto;">
+    <div class="card shadow-sm border-0" style="max-width: 800px;">
         <div class="card-header bg-light pb-0">
             <h6 class="fw-bold text-muted"><i class="bi bi-cart-check me-1"></i> Informações do Checkout</h6>
         </div>
@@ -51,7 +51,7 @@
 
                     <!-- Detalhes da Venda -->
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">Nº de Assentos</label>
+                        <label class="form-label fw-bold">Nº de Vagas</label>
                         <div class="input-group">
                             <span class="input-group-text bg-white"><i class="bi bi-person-plus"></i></span>
                             <input type="number" class="form-control bg-light" th:field="${reserva.qtdVagas}" required min="1">

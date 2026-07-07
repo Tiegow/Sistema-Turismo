@@ -1,4 +1,4 @@
-<html th:replace="~{fragments/layout :: page('Equipe Operacional', ~{::section})}">
+<html th:replace="~{fragments/layout :: page('Gestão de Equipe', ~{::section})}">
 <section>
     
     <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
@@ -16,7 +16,7 @@
             <h3 class="fw-bold m-0">Equipe Operacional</h3>
             <p class="text-muted small m-0">Gerencie guias e motoristas da agência</p>
         </div>
-        <a th:href="@{/colaboradores/novo}" class="btn btn-warning text-dark fw-bold">
+        <a th:href="@{/colaboradores/novo}" class="btn btn-warning text-white fw-bold">
             <i class="bi bi-person-plus me-1"></i> Novo Colaborador
         </a>
     </div>
