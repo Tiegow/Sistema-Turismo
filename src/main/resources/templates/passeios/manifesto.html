@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Manifesto de Embarque - ' + ${passeio.roteiro.nome}"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .manifesto-container { max-width: 900px; margin: 30px auto; background: white; padding: 40px; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); border-radius: 8px; }
+        .print-btn { position: fixed; bottom: 30px; right: 30px; z-index: 1000; border-radius: 50px; padding: 12px 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        
+        @media print {
+            body { background: white; margin: 0; padding: 0; font-size: 11pt; }
+            .manifesto-container { max-width: 100%; margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
+            .print-btn { display: none !important; }
+            .badge { border: 1px solid #000; color: #000 !important; background: transparent !important; }
+            table { border-collapse: collapse !important; }
+            th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; color-adjust: exact; }
+            @page { margin: 1cm; size: A4; }
+        }
+    </style>
+</head>
+<body>
+
+    <button onclick="window.print()" class="btn btn-primary print-btn fw-bold">
+        <i class="bi bi-printer-fill me-2"></i> Imprimir Manifesto
+    </button>
+
+    <div class="manifesto-container">
+        <!-- Cabeçalho -->
+        <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Manifesto de Embarque</h2>
+                <h4 class="text-primary mt-1" th:text="${passeio.roteiro.nome}">Roteiro</h4>
+            </div>
+            <div class="text-end">
+                <p class="mb-1 fw-bold fs-5"><i class="bi bi-calendar-event me-2"></i><span th:text="${#temporals.format(passeio.dataHora, 'dd/MM/yyyy')}"></span></p>
+                <p class="mb-0 fw-bold fs-5 text-danger"><i class="bi bi-clock me-2"></i><span th:text="${#temporals.format(passeio.dataHora, 'HH:mm')}"></span>h</p>
+            </div>
+        </div>
+
+        <!-- Dados Logísticos -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card bg-light border-0 h-100">
+                    <div class="card-body py-2">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-person-badge text-primary me-2"></i>Equipe Escalada</h6>
+                        <ul class="list-unstyled mb-0 small">
+                            <li th:each="c : ${passeio.colaboradoresAlocados}" th:text="${c.nome}"></li>
+                            <li th:if="${#lists.isEmpty(passeio.colaboradoresAlocados)}" class="text-danger fw-bold">Sem guia/motorista alocado!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-light border-0 h-100">
+                    <div class="card-body py-2">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-bus-front text-primary me-2"></i>Frota (Veículos)</h6>
+                        <ul class="list-unstyled mb-0 small">
+                            <li th:each="v : ${passeio.veiculosAlocados}">
+                                <span th:text="${v.modelo}"></span> - Placa: <strong th:text="${v.placa}"></strong> 
+                                (<span th:text="${v.capacidade}"></span> lugares)
+                            </li>
+                            <li th:if="${#lists.isEmpty(passeio.veiculosAlocados)}" class="text-danger fw-bold">Sem veículos alocados!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Passageiros -->
+        <h5 class="fw-bold mb-3">Lista de Passageiros (<span th:text="${passeio.capacidade - passeio.vagasDisp}"></span> ocupantes)</h5>
+        
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 5%">#</th>
+                    <th style="width: 35%">Passageiro (Documento)</th>
+                    <th style="width: 30%">Local de Embarque</th>
+                    <th style="width: 15%">Telefone</th>
+                    <th style="width: 15%" class="text-center">Pagamento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <th:block th:each="reserva, iterStat : ${reservas}">
+                    <!-- Titular -->
+                    <tr>
+                        <td class="fw-bold text-center" th:text="${iterStat.count}"></td>
+                        <td>
+                            <div class="fw-bold" th:text="${reserva.turista.nome}"></div>
+                            <small class="text-muted">Doc: <span th:text="${reserva.turista.identificacao}"></span></small>
+                            <span class="badge bg-primary ms-1" style="font-size: 0.6rem;">TITULAR</span>
+                        </td>
+                        <td th:text="${reserva.localEmbarque}"></td>
+                        <td th:text="${reserva.turista.telefone}"></td>
+                        <td class="text-center">
+                            <span th:if="${reserva.pagamentoEfetuado}" class="badge bg-success">PAGO</span>
+                            <span th:unless="${reserva.pagamentoEfetuado}" class="badge bg-warning text-dark fw-bold">COBRAR</span>
+                        </td>
+                    </tr>
+                    <!-- Acompanhantes -->
+                    <tr th:each="acomp : ${reserva.turista.acompanhantes}">
+                        <td></td>
+                        <td colspan="4" class="ps-4">
+                            <i class="bi bi-arrow-return-right text-muted me-2"></i>
+                            <span th:text="${acomp.nome}"></span>
+                            <small class="text-muted ms-2" th:if="${acomp.telefone != null}">(Tel: <span th:text="${acomp.telefone}"></span>)</small>
+                            <span class="badge bg-secondary ms-1" style="font-size: 0.6rem;">ACOMP.</span>
+                        </td>
+                    </tr>
+                </th:block>
+                <tr th:if="${#lists.isEmpty(reservas)}">
+                    <td colspan="5" class="text-center py-4 text-muted">Nenhum passageiro reservado para este passeio até o momento.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Assinaturas -->
+        <div class="row mt-5 pt-5 text-center">
+            <div class="col-6">
+                <div class="border-top border-dark mx-4 pt-2">
+                    <small class="fw-bold d-block">Assinatura do Guia Responsável</small>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="border-top border-dark mx-4 pt-2">
+                    <small class="fw-bold d-block">Assinatura do Motorista</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

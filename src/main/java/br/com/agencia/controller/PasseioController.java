@@ -3,7 +3,10 @@ package br.com.agencia.controller;
 import br.com.agencia.model.Colaborador;
 import br.com.agencia.model.Passeio;
 import br.com.agencia.model.Veiculo;
+import br.com.agencia.model.Reserva;
 import br.com.agencia.service.PasseioService;
+import br.com.agencia.service.ReservaService;
+import br.com.agencia.service.RoteiroService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +21,13 @@ import java.util.List;
 public class PasseioController {
 
     private final PasseioService passeioService;
+    private final ReservaService reservaService;
+    private final RoteiroService roteiroService;
 
-    public PasseioController(PasseioService passeioService) {
+    public PasseioController(PasseioService passeioService, ReservaService reservaService, RoteiroService roteiroService) {
         this.passeioService = passeioService;
+        this.reservaService = reservaService;
+        this.roteiroService = roteiroService;
     }
 
     @GetMapping
@@ -93,6 +100,25 @@ public class PasseioController {
             redirect.addFlashAttribute("erro", e.getMessage());
         }
         return "redirect:/passeios";
+    }
+
+    @GetMapping("/{id}/manifesto")
+    public String gerarManifesto(@PathVariable int id, Model model) {
+        try {
+            Passeio p = passeioService.buscarPorId(id);
+            if (p == null) return "redirect:/passeios";
+            
+            p.setRoteiro(roteiroService.buscarPorId(p.getRoteiro().getId()));
+            
+            List<Reserva> reservas = reservaService.buscarReservasCompletasPorPasseio(id);
+            
+            model.addAttribute("passeio", p);
+            model.addAttribute("reservas", reservas);
+            
+            return "passeios/manifesto";
+        } catch (Exception e) {
+            return "redirect:/passeios";
+        }
     }
 
     private String carregarFormulario(Passeio passeio, Model model) {

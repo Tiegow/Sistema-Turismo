@@ -49,6 +49,18 @@ public class ReservaService {
         }
     }
 
+    public List<Reserva> buscarReservasCompletasPorPasseio(int idPasseio) {
+        try {
+            List<Reserva> reservas = reservaDAO.buscarPorPasseio(idPasseio);
+            for (Reserva r : reservas) {
+                r.setTurista(turistaDAO.buscarPorId(r.getTurista().getId()));
+            }
+            return reservas;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar passageiros do passeio.", e);
+        }
+    }
+
     public void salvar(Reserva reserva) {
         try {
             Passeio passeio = passeioDAO.buscarPorId(reserva.getPasseio().getId());

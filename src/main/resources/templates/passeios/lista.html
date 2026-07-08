@@ -66,6 +66,9 @@
                             <span class="fw-bold text-success" th:text="'R$ ' + ${p.preco}"></span>
                         </td>
                         <td class="text-end pe-4">
+                            <a th:href="@{/passeios/{id}/manifesto(id=${p.id})}" target="_blank" class="btn btn-sm btn-outline-dark" title="Gerar Manifesto de Embarque">
+                                <i class="bi bi-printer"></i>
+                            </a>
                             <a th:href="@{/passeios/{id}/editar(id=${p.id})}" class="btn btn-sm btn-outline-primary" title="Editar Escala">
                                 <i class="bi bi-pencil"></i>
                             </a>
