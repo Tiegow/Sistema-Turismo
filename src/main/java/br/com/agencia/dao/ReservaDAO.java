@@ -152,4 +152,60 @@ public class ReservaDAO {
         }
         return false;
     }
+
+    public Double calcularReceitaTotal() throws SQLException {
+        String sql = "SELECT SUM(valor_total) as total FROM RESERVA WHERE pagamento_efetuado = 1";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble("total");
+            }
+        }
+        return 0.0;
+    }
+
+    public Double calcularReceitaAnoAtual() throws SQLException {
+        String sql = "SELECT SUM(r.valor_total) as total FROM RESERVA r " +
+                     "JOIN PASSEIO p ON r.id_passeio = p.id " +
+                     "WHERE r.pagamento_efetuado = 1 AND YEAR(p.data_hora) = YEAR(NOW())";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble("total");
+            }
+        }
+        return 0.0;
+    }
+
+    public Double calcularReceitaMesAtual() throws SQLException {
+        String sql = "SELECT SUM(r.valor_total) as total FROM RESERVA r " +
+                     "JOIN PASSEIO p ON r.id_passeio = p.id " +
+                     "WHERE r.pagamento_efetuado = 1 AND YEAR(p.data_hora) = YEAR(NOW()) AND MONTH(p.data_hora) = MONTH(NOW())";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble("total");
+            }
+        }
+        return 0.0;
+    }
+
+    public String buscarRoteiroMaisVendido() throws SQLException {
+        String sql = "SELECT r.nome FROM RESERVA res " +
+                     "JOIN PASSEIO p ON res.id_passeio = p.id " +
+                     "JOIN ROTEIRO r ON p.id_roteiro = r.id " +
+                     "GROUP BY r.id, r.nome " +
+                     "ORDER BY SUM(res.qtd_vagas) DESC LIMIT 1";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getString("nome");
+            }
+        }
+        return "Nenhum";
+    }
 }

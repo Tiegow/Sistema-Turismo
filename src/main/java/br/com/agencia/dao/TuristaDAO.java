@@ -177,4 +177,16 @@ public class TuristaDAO extends AbstractPessoaDAO {
         }
         return lista;
     }
+
+    public int contarTotalTuristas() throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM TURISTA";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        }
+        return 0;
+    }
 }

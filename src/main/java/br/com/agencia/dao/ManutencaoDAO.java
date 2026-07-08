@@ -102,4 +102,16 @@ public class ManutencaoDAO {
         }
         return false;
     }
+
+    public int contarVeiculosEmManutencao() throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM MANUTENCAO WHERE data_entrada <= NOW() AND (data_saida IS NULL OR data_saida > NOW())";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        }
+        return 0;
+    }
 }

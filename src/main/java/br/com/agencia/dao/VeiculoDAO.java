@@ -151,4 +151,16 @@ public class VeiculoDAO {
         }
         return manutencoes;
     }
+
+    public int contarTotalVeiculos() throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM VEICULO";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        }
+        return 0;
+    }
 }

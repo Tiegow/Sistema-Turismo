@@ -31,7 +31,14 @@
         </ul>
     </div>
     
-    <div class="row g-4">
+    <style>
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        }
+    </style>
+
+        <div class="row g-4">
         <!-- Card Vendas -->
         <!-- Card Operacional -->
         <div class="col-md-3">
@@ -81,6 +88,112 @@
                         <a href="/colaboradores" class="btn btn-warning text-white flex-fill" title="Equipe"><i class="bi bi-briefcase"></i></a>
                         <a href="/veiculos" class="btn btn-warning text-white flex-fill" title="Veículos"><i class="bi bi-car-front"></i></a>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ribbon de Métricas -->
+    <div class="row row-cols-1 row-cols-md-5 g-3 my-4">
+        <!-- Faturamento -->
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm metric-card" style="transition: all 0.2s ease;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="flex-shrink-0 bg-success bg-opacity-10 p-2 rounded">
+                            <i class="bi bi-currency-dollar text-success fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-0 small text-uppercase fw-bold">Faturamento</h6>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.75rem;">Total Histórico</small>
+                        <h4 class="fw-bold mb-0 text-success">
+                            R$ <span th:text="${#numbers.formatDecimal(totalReceita != null ? totalReceita : 0, 1, 'POINT', 2, 'COMMA')}"></span>
+                        </h4>
+                    </div>
+                    <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.7rem;">ESTE ANO</small>
+                            <span class="fw-bold text-dark small">R$ <span th:text="${#numbers.formatDecimal(receitaAno != null ? receitaAno : 0, 1, 'POINT', 2, 'COMMA')}"></span></span>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block" style="font-size: 0.7rem;">ESTE MÊS</small>
+                            <span class="fw-bold text-dark small">R$ <span th:text="${#numbers.formatDecimal(receitaMes != null ? receitaMes : 0, 1, 'POINT', 2, 'COMMA')}"></span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roteiro Top -->
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm metric-card" style="transition: all 0.2s ease;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="flex-shrink-0 bg-warning bg-opacity-10 p-2 rounded">
+                            <i class="bi bi-trophy text-warning fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-0 small text-uppercase fw-bold">Mais Vendido</h6>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold mb-0 text-dark text-truncate" th:title="${roteiroMaisVendido}" th:text="${roteiroMaisVendido != null ? roteiroMaisVendido : 'Nenhum'}"></h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- Passeios Futuros -->
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm metric-card" style="transition: all 0.2s ease;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-2 rounded">
+                            <i class="bi bi-calendar-check text-primary fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-0 small text-uppercase fw-bold">Passeios (Futuros)</h6>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-0 text-dark" th:text="${passeiosFuturos != null ? passeiosFuturos : 0}"></h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Turistas -->
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm metric-card" style="transition: all 0.2s ease;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="flex-shrink-0 bg-info bg-opacity-10 p-2 rounded">
+                            <i class="bi bi-people text-info fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-0 small text-uppercase fw-bold">Turistas</h6>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-0 text-dark" th:text="${totalTuristas != null ? totalTuristas : 0}"></h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frota -->
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm metric-card" style="transition: all 0.2s ease;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="flex-shrink-0 bg-secondary bg-opacity-10 p-2 rounded">
+                            <i class="bi bi-car-front text-secondary fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-0 small text-uppercase fw-bold">Frota Disponível</h6>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-0 text-dark">
+                        <span th:text="${veiculosDisponiveis != null ? veiculosDisponiveis : 0}"></span> 
+                        <small class="text-muted fs-6 fw-normal">/ <span th:text="${veiculosTotais != null ? veiculosTotais : 0}"></span></small>
+                    </h4>
                 </div>
             </div>
         </div>

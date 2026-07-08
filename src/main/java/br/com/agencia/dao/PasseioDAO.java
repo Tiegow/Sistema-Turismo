@@ -331,4 +331,16 @@ public class PasseioDAO {
         }
         return false;
     }
+
+    public int contarPasseiosFuturos() throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM PASSEIO WHERE data_hora >= NOW()";
+        try (Connection con = ConnectionFactory.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        }
+        return 0;
+    }
 }
